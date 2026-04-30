@@ -1,0 +1,35 @@
+{
+  "name": "latitud360",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Latitud360 — el sistema operativo de la minería del NOA. Monorepo Turborepo.",
+  "license": "UNLICENSED",
+  "author": "Nativos Consultora Digital <hola@nativos.la>",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --ignore-path .gitignore",
+    "db:generate": "pnpm --filter @latitud360/database db:generate",
+    "db:migrate": "pnpm --filter @latitud360/database db:migrate",
+    "db:seed": "pnpm --filter @latitud360/database db:seed",
+    "db:studio": "pnpm --filter @latitud360/database db:studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "turbo": "^2.3.3",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,13 @@
+.DS_Store
+*.log
+node_modules
+.env
+.env.local
+.env.*.local
+.playwright-mcp/
+*.psd
+*.ai
+*.sketch
+*.fig
+README.md
+videos/README.md

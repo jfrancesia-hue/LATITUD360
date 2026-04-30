@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Latitud360",
+    "slug": "latitud360",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "latitud360",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0A0A0A"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "la.nativos.latitud360",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Latitud360 usa la cámara para adjuntar fotos a partes diarios e incidentes.",
+        "NSLocationWhenInUseUsageDescription": "Latitud360 usa la ubicación para georreferenciar incidentes en faena.",
+        "NSPhotoLibraryUsageDescription": "Latitud360 accede a fotos para adjuntarlas a reportes."
+      }
+    },
+    "android": {
+      "package": "la.nativos.latitud360",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0A0A0A"
+      },
+      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+    },
+    "web": { "bundler": "metro" },
+    "plugins": [
+      "expo-router",
+      ["expo-camera", { "cameraPermission": "Permitir Latitud360 usar la cámara para reportes." }],
+      ["expo-location", { "locationAlwaysAndWhenInUsePermission": "Permitir Latitud360 georreferenciar incidentes." }]
+    ]
+  }
+}

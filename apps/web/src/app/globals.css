@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  --negro-mina: #0A0A0A;
+  --gris-acero: #1F1F1F;
+  --naranja-seguridad: #FF6B1A;
+  --turquesa-andes: #00C2B8;
+  --dorado-litio: #D4AF37;
+  --blanco-artico: #F5F5F5;
+}
+
+html, body {
+  background: var(--negro-mina);
+  color: var(--blanco-artico);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--negro-mina); }
+::-webkit-scrollbar-thumb { background: var(--gris-acero); border-radius: 4px; }
+
+/* Selection */
+::selection { background: var(--naranja-seguridad); color: white; }
+
+/* Liquid glass utility (compartido con landing) */
+@layer utilities {
+  .liquid-glass {
+    @apply relative overflow-hidden;
+    background: rgba(255,255,255,0.01);
+    backdrop-filter: blur(4px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.10);
+  }
+  .liquid-glass::before {
+    content: ""; position: absolute; inset: 0;
+    border-radius: inherit; padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

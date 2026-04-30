@@ -1,0 +1,942 @@
+// ════════════════════════════════════════════════════════════════════
+//  Latitud360 — Prisma Schema (Fase 1 completa)
+//
+//  Multi-tenant: schema-per-tenant resuelto por subdomain.
+//  Driver: PostgreSQL 16 + pg adapter.
+//  Productos cubiertos en este schema:
+//    1) Core — Organization, Site, Area, User, Subscription, AuditLog
+//    2) Minera360 / SafetyOps — DailyReport, Incident, Investigation,
+//                                WorkPermit, PPE, Inspection, Finding
+//    3) Contacto — Post, Reaction, Comment, Recognition, VacationRequest,
+//                  PaySlip, OnboardingFlow, Survey
+//    4) Latitud — Article, Sponsor, Interview, NewsletterIssue, LiveStream
+// ════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters", "fullTextSearchPostgres"]
+  engineType      = "library"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CORE
+// ─────────────────────────────────────────────────────────────────
+
+model Organization {
+  id           String        @id @default(uuid()) @db.Uuid
+  slug         String        @unique
+  name         String
+  legalName    String?
+  taxId        String?       @unique
+  country      String        @default("AR") @db.Char(2)
+  province     String?
+  industry     String        @default("mining")
+  size         OrgSize?
+  logoUrl      String?
+  primaryColor String?       @db.VarChar(7)
+  isActive     Boolean       @default(true)
+
+  subscription Subscription?
+  sites        Site[]
+  users        User[]
+  posts        Post[]
+  incidents    Incident[]
+  dailyReports DailyReport[]
+  permits      WorkPermit[]
+  ppes         PPE[]
+  inspections  Inspection[]
+  surveys      Survey[]
+  flows        OnboardingFlow[]
+  recognitions Recognition[]
+  auditLogs    AuditLog[]
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model Site {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  name           String
+  type           SiteType
+  latitude       Float?
+  longitude      Float?
+  altitude       Int?
+  address        String?
+  province       String?
+  isActive       Boolean      @default(true)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  areas        Area[]
+  incidents    Incident[]
+  dailyReports DailyReport[]
+  permits      WorkPermit[]
+  inspections  Inspection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+}
+
+model Area {
+  id        String   @id @default(uuid()) @db.Uuid
+  siteId    String   @db.Uuid
+  name      String
+  type      String?
+  isActive  Boolean  @default(true)
+
+  site         Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  incidents    Incident[]
+  dailyReports DailyReport[]
+  permits      WorkPermit[]
+
+  createdAt DateTime @default(now())
+
+  @@index([siteId])
+}
+
+model User {
+  id              String      @id @default(uuid()) @db.Uuid
+  authId          String?     @unique // ID en Supabase Auth
+  email           String      @unique
+  fullName        String
+  dni             String?     @unique
+  phone           String?
+  avatarUrl       String?
+  organizationId  String      @db.Uuid
+  role            Role        @default(operator)
+  birthDate       DateTime?   @db.Date
+  hireDate        DateTime?   @db.Date
+  jobTitle        String?
+  isActive        Boolean     @default(true)
+  lastLoginAt     DateTime?
+  twoFactorEnabled Boolean    @default(false)
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  productAccess   ProductAccess[]
+  ppeAssignments  PPEAssignment[]
+  recognitionsFrom Recognition[] @relation("RecognitionFrom")
+  recognitionsTo   Recognition[] @relation("RecognitionTo")
+  vacations        VacationRequest[]
+  paySlips         PaySlip[]
+  onboardings      UserOnboarding[]
+  postsAuthored    Post[]   @relation("PostAuthor")
+  comments         Comment[]
+  reactions        Reaction[]
+  postReads        PostRead[]
+  surveyResponses  SurveyResponse[]
+  reportedIncidents Incident[] @relation("IncidentReporter")
+  reportedDailyReports DailyReport[] @relation("DailyReporter")
+  notifications    Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, role])
+  @@index([email])
+}
+
+model ProductAccess {
+  id      String  @id @default(uuid()) @db.Uuid
+  userId  String  @db.Uuid
+  product Product
+  level   Int     @default(1) // 1=read, 2=write, 3=approve, 4=admin
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, product])
+}
+
+model Subscription {
+  id              String     @id @default(uuid()) @db.Uuid
+  organizationId  String     @unique @db.Uuid
+  plan            Plan
+  /// Módulos contratados como string array, ej: ["safetyops", "contacto"].
+  /// Permite Land&Expand granular: cada módulo se activa por separado.
+  /// Valores válidos: safetyops, envirowatch, assetiq, talentmine,
+  /// procurement, logitrack, eu_compliance, contacto_basic,
+  /// contacto_full, latitud, ai_copilot, toori, energiai
+  modules         String[]
+  startDate       DateTime
+  endDate         DateTime
+  pricePerYear    Decimal    @db.Decimal(12, 2)
+  currency        String     @default("USD") @db.Char(3)
+  status          SubStatus  @default(trialing)
+  stripeCustomerId String?
+  stripeSubscriptionId String? @unique
+  mpPreapprovalId  String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────────
+// AUDIT & SECURITY
+// ─────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @db.Uuid
+  actorId         String?  @db.Uuid
+  action          String   // "user.created", "incident.closed", etc
+  resource        String   // "User", "Incident", etc
+  resourceId      String?
+  before          Json?
+  after           Json?
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([resource, resourceId])
+}
+
+model Notification {
+  id              String         @id @default(uuid()) @db.Uuid
+  organizationId  String         @db.Uuid
+  userId          String         @db.Uuid
+  type            NotificationType
+  title           String
+  body            String?
+  data            Json?
+  channel         NotificationChannel @default(in_app)
+  readAt          DateTime?
+  sentAt          DateTime?
+  createdAt       DateTime       @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, readAt])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MINERA360 — SafetyOps
+// ─────────────────────────────────────────────────────────────────
+
+model DailyReport {
+  id               String       @id @default(uuid()) @db.Uuid
+  organizationId   String       @db.Uuid
+  siteId           String       @db.Uuid
+  areaId           String?      @db.Uuid
+  reporterId       String       @db.Uuid
+  shift            Shift
+  reportDate       DateTime     @db.Date
+  weatherCondition String?
+  productionData   Json?
+  observations     String?
+  photoUrls        String[]
+  status           ReportStatus @default(submitted)
+  signedById       String?      @db.Uuid
+  signedAt         DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  site         Site         @relation(fields: [siteId], references: [id])
+  area         Area?        @relation(fields: [areaId], references: [id])
+  reporter     User         @relation("DailyReporter", fields: [reporterId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, reportDate(sort: Desc)])
+  @@index([siteId, reportDate])
+}
+
+model Incident {
+  id              String        @id @default(uuid()) @db.Uuid
+  organizationId  String        @db.Uuid
+  siteId          String        @db.Uuid
+  areaId          String?       @db.Uuid
+  reporterId      String        @db.Uuid
+  type            IncidentType
+  severity        Severity
+  title           String
+  description     String
+  occurredAt      DateTime
+  reportedAt      DateTime      @default(now())
+  involvedUserIds String[]      @db.Uuid
+  injuryType      String?
+  daysLost        Int?
+  location        Json?
+  photoUrls       String[]
+  videoUrls       String[]
+  status          IncidentStatus @default(open)
+
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  site          Site          @relation(fields: [siteId], references: [id])
+  area          Area?         @relation(fields: [areaId], references: [id])
+  reporter      User          @relation("IncidentReporter", fields: [reporterId], references: [id])
+  investigation IncidentInvestigation?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, occurredAt(sort: Desc)])
+  @@index([severity, status])
+  @@index([siteId, status])
+}
+
+model IncidentInvestigation {
+  id                String   @id @default(uuid()) @db.Uuid
+  incidentId        String   @unique @db.Uuid
+  method            String   // "5_porques" | "bowtie" | "icam"
+  rootCauses        Json     // [{cause, evidence, depth}]
+  immediateActions  String[]
+  preventiveActions Json[]   // [{action, assignedTo, dueDate, status}]
+  conclusions       String?
+  closedAt          DateTime?
+  closedById        String?  @db.Uuid
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkPermit {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @db.Uuid
+  siteId          String       @db.Uuid
+  areaId          String?      @db.Uuid
+  permitType      PermitType
+  requestedById   String       @db.Uuid
+  approvedById    String?      @db.Uuid
+  workerIds       String[]     @db.Uuid
+  description     String
+  riskAssessment  Json
+  ppeRequired     String[]
+  validFrom       DateTime
+  validUntil      DateTime
+  status          PermitStatus @default(pending)
+  approvedAt      DateTime?
+  closedAt        DateTime?
+  rejectionReason String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  site         Site         @relation(fields: [siteId], references: [id])
+  area         Area?        @relation(fields: [areaId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, validFrom(sort: Desc)])
+  @@index([status, validFrom])
+}
+
+model PPE {
+  id                    String       @id @default(uuid()) @db.Uuid
+  organizationId        String       @db.Uuid
+  name                  String
+  category              String       // head | eye | hand | foot | body | respiratory
+  brand                 String?
+  model                 String?
+  certificationStandard String?
+  shelfLifeMonths       Int?
+  stock                 Int          @default(0)
+  imageUrl              String?
+  isCritical            Boolean      @default(false)
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignments  PPEAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, category])
+}
+
+model PPEAssignment {
+  id            String    @id @default(uuid()) @db.Uuid
+  ppeId         String    @db.Uuid
+  userId        String    @db.Uuid
+  assignedAt    DateTime  @default(now())
+  expiresAt     DateTime?
+  signedReceipt Boolean   @default(false)
+  signatureUrl  String?
+  returnedAt    DateTime?
+
+  ppe  PPE  @relation(fields: [ppeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([ppeId])
+}
+
+model Inspection {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizationId  String    @db.Uuid
+  siteId          String    @db.Uuid
+  type            String
+  inspectorId     String    @db.Uuid
+  scheduledFor    DateTime
+  completedAt     DateTime?
+  template        Json
+  results         Json?
+  score           Float?
+  signedAt        DateTime?
+  signatureUrl    String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  site         Site         @relation(fields: [siteId], references: [id])
+  findings     Finding[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, scheduledFor(sort: Desc)])
+}
+
+model Finding {
+  id           String    @id @default(uuid()) @db.Uuid
+  inspectionId String    @db.Uuid
+  description  String
+  severity     Severity
+  photoUrl     String?
+  assignedToId String?   @db.Uuid
+  dueDate      DateTime?
+  status       String    @default("open")
+  closedAt     DateTime?
+
+  inspection Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([inspectionId, status])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CONTACTO — RRHH y comunicación interna
+// ─────────────────────────────────────────────────────────────────
+
+model Post {
+  id              String     @id @default(uuid()) @db.Uuid
+  organizationId  String     @db.Uuid
+  authorId        String     @db.Uuid
+  type            PostType
+  title           String?
+  content         String
+  mediaUrls       String[]
+  audience        Audience
+  audienceFilter  Json?
+  requiresAck     Boolean    @default(false)
+  publishedAt     DateTime?
+  expiresAt       DateTime?
+  pinned          Boolean    @default(false)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  author       User         @relation("PostAuthor", fields: [authorId], references: [id])
+  reactions    Reaction[]
+  comments     Comment[]
+  reads        PostRead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, publishedAt(sort: Desc)])
+  @@index([type, publishedAt])
+}
+
+model PostRead {
+  id           String   @id @default(uuid()) @db.Uuid
+  postId       String   @db.Uuid
+  userId       String   @db.Uuid
+  readAt       DateTime @default(now())
+  acknowledged Boolean  @default(false)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([userId])
+}
+
+model Reaction {
+  id        String       @id @default(uuid()) @db.Uuid
+  postId    String       @db.Uuid
+  userId    String       @db.Uuid
+  type      ReactionType
+  createdAt DateTime     @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @db.Uuid
+  userId    String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId, createdAt])
+}
+
+model Recognition {
+  id              String   @id @default(uuid()) @db.Uuid
+  organizationId  String   @db.Uuid
+  fromUserId      String   @db.Uuid
+  toUserId        String   @db.Uuid
+  value           String
+  message         String
+  isPublic        Boolean  @default(true)
+  photoUrl        String?
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  from         User         @relation("RecognitionFrom", fields: [fromUserId], references: [id])
+  to           User         @relation("RecognitionTo",   fields: [toUserId],   references: [id])
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([toUserId])
+}
+
+model VacationRequest {
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String        @db.Uuid
+  fromDate      DateTime      @db.Date
+  toDate        DateTime      @db.Date
+  daysRequested Int
+  reason        String?
+  status        RequestStatus @default(pending)
+  approvedById  String?       @db.Uuid
+  approvedAt    DateTime?
+  rejectionReason String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+}
+
+model PaySlip {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  period      String    // "2026-04"
+  grossAmount Decimal   @db.Decimal(12, 2)
+  netAmount   Decimal   @db.Decimal(12, 2)
+  pdfUrl      String
+  signedAt    DateTime?
+  signature   String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, period])
+}
+
+model OnboardingFlow {
+  id              String           @id @default(uuid()) @db.Uuid
+  organizationId  String           @db.Uuid
+  name            String
+  applicableRoles Role[]
+  isActive        Boolean          @default(true)
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  steps        OnboardingStep[]
+  userOnboardings UserOnboarding[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OnboardingStep {
+  id          String  @id @default(uuid()) @db.Uuid
+  flowId      String  @db.Uuid
+  order       Int
+  type        String  // document_sign | video | training | form
+  title       String
+  description String?
+  contentUrl  String?
+  isRequired  Boolean @default(true)
+
+  flow OnboardingFlow @relation(fields: [flowId], references: [id], onDelete: Cascade)
+
+  @@index([flowId, order])
+}
+
+model UserOnboarding {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  flowId      String    @db.Uuid
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  progress    Json
+
+  user User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flow OnboardingFlow @relation(fields: [flowId], references: [id])
+
+  @@unique([userId, flowId])
+}
+
+model Survey {
+  id              String         @id @default(uuid()) @db.Uuid
+  organizationId  String         @db.Uuid
+  type            SurveyType
+  title           String
+  description     String?
+  questions       Json
+  audience        Json
+  isAnonymous     Boolean        @default(false)
+  startsAt        DateTime
+  endsAt          DateTime
+  isActive        Boolean        @default(true)
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  responses    SurveyResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SurveyResponse {
+  id          String   @id @default(uuid()) @db.Uuid
+  surveyId    String   @db.Uuid
+  userId      String?  @db.Uuid
+  answers     Json
+  submittedAt DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([surveyId])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// LATITUD — Medio editorial
+// ─────────────────────────────────────────────────────────────────
+
+model Article {
+  id            String           @id @default(uuid()) @db.Uuid
+  slug          String           @unique
+  title         String
+  subtitle      String?
+  excerpt       String
+  content       String
+  coverImageUrl String?
+  authorId      String           @db.Uuid
+  category      ArticleCategory
+  tags          String[]
+  status        ArticleStatus    @default(draft)
+  publishedAt   DateTime?
+  scheduledFor  DateTime?
+  views         Int              @default(0)
+  featured      Boolean          @default(false)
+  sponsorId     String?          @db.Uuid
+
+  sponsor Sponsor? @relation(fields: [sponsorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([category, publishedAt])
+  @@index([sponsorId])
+}
+
+model Sponsor {
+  id               String       @id @default(uuid()) @db.Uuid
+  name             String
+  logoUrl          String
+  websiteUrl       String?
+  tier             SponsorTier
+  startDate        DateTime
+  endDate          DateTime
+  contractAmount   Decimal      @db.Decimal(12, 2)
+  contactPerson    String?
+  contactEmail     String?
+  notesPerWeek     Int          @default(2)
+  hasInterview     Boolean      @default(false)
+  hasFieldCoverage Boolean      @default(false)
+  isActive         Boolean      @default(true)
+
+  articles   Article[]
+  interviews Interview[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Interview {
+  id              String          @id @default(uuid()) @db.Uuid
+  title           String
+  guestName       String
+  guestTitle      String?
+  guestCompany    String?
+  scheduledFor    DateTime
+  durationMinutes Int             @default(45)
+  videoUrl        String?
+  thumbnailUrl    String?
+  transcript      String?
+  status          InterviewStatus @default(scheduled)
+  sponsorId       String?         @db.Uuid
+
+  sponsor Sponsor? @relation(fields: [sponsorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  fullName     String?
+  company      String?
+  role         String?
+  segment      String?
+  subscribedAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+  preferences  Json?
+}
+
+model NewsletterIssue {
+  id           String    @id @default(uuid()) @db.Uuid
+  number       Int       @unique
+  title        String
+  htmlContent  String
+  scheduledFor DateTime
+  sentAt       DateTime?
+  recipients   Int?
+  openRate     Float?
+  clickRate    Float?
+}
+
+model LiveStream {
+  id           String    @id @default(uuid()) @db.Uuid
+  title        String
+  description  String?
+  scheduledFor DateTime
+  startedAt    DateTime?
+  endedAt      DateTime?
+  rtmpKey      String?
+  hlsUrl       String?
+  recordingUrl String?
+  viewerCount  Int       @default(0)
+  peakViewers  Int       @default(0)
+  isLive       Boolean   @default(false)
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────
+
+enum Role {
+  super_admin
+  org_admin
+  product_admin
+  manager
+  supervisor
+  operator
+  auditor
+  external_journalist
+}
+
+enum Product {
+  minera360
+  contacto
+  latitud
+  toori
+}
+
+enum OrgSize {
+  small      // <100
+  medium     // 100-500
+  large      // 500-2000
+  enterprise // >2000
+}
+
+enum SiteType {
+  mine
+  plant
+  office
+  port
+  warehouse
+  camp
+}
+
+enum Plan {
+  pioneer       // Programa Pioneros NOA — descuento -33% año 1, USD 24k SafetyOps
+  starter       // Solo SafetyOps — USD 35k
+  growth        // SafetyOps + Contacto — USD 70k
+  enterprise    // Bundle completo — USD 145-195k
+  custom        // Negociación específica
+}
+
+enum SubStatus {
+  active
+  trialing
+  past_due
+  canceled
+}
+
+enum Shift {
+  morning
+  afternoon
+  night
+}
+
+enum ReportStatus {
+  draft
+  submitted
+  reviewed
+  approved
+}
+
+enum IncidentType {
+  accident
+  near_miss
+  unsafe_act
+  unsafe_condition
+  environmental
+  property_damage
+}
+
+enum Severity {
+  low
+  medium
+  high
+  critical
+}
+
+enum IncidentStatus {
+  open
+  investigating
+  awaiting_actions
+  closed
+}
+
+enum PermitType {
+  height
+  confined_space
+  hot_work
+  electrical
+  lifting
+  excavation
+  chemical
+}
+
+enum PermitStatus {
+  pending
+  approved
+  rejected
+  active
+  expired
+  closed
+}
+
+enum PostType {
+  announcement
+  news
+  recognition
+  poll
+  event
+  policy
+}
+
+enum Audience {
+  all
+  site
+  area
+  role
+  custom
+}
+
+enum ReactionType {
+  like
+  applause
+  heart
+  idea
+}
+
+enum RequestStatus {
+  pending
+  approved
+  rejected
+  canceled
+}
+
+enum SurveyType {
+  pulse
+  climate
+  exit
+  custom
+}
+
+enum ArticleCategory {
+  news
+  interview
+  analysis
+  report
+  opinion
+  press_release
+  case_study
+}
+
+enum ArticleStatus {
+  draft
+  in_review
+  approved
+  scheduled
+  published
+  archived
+}
+
+enum SponsorTier {
+  base
+  medium
+  premium
+  state_partnership
+}
+
+enum InterviewStatus {
+  scheduled
+  in_production
+  ready
+  published
+}
+
+enum NotificationType {
+  incident_critical
+  incident_assigned
+  permit_pending_approval
+  permit_approved
+  permit_rejected
+  ppe_expiring
+  inspection_scheduled
+  post_announcement
+  post_recognition
+  birthday
+  work_anniversary
+  vacation_status
+}
+
+enum NotificationChannel {
+  in_app
+  email
+  push
+  whatsapp
+  sms
+}

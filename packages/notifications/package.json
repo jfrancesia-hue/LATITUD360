@@ -1,0 +1,27 @@
+{
+  "name": "@latitud360/notifications",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hub": "./src/hub.ts",
+    "./templates": "./src/templates.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@latitud360/database": "workspace:*",
+    "@latitud360/shared": "workspace:*",
+    "expo-server-sdk": "^3.10.0",
+    "resend": "^4.0.1",
+    "twilio": "^5.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}
