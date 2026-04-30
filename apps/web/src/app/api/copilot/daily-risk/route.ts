@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
       take: 30,
       select: { id: true, severity: true, type: true, occurredAt: true, title: true, daysLost: true },
     }),
-    prisma.ppeAssignment.findMany({
+    prisma.pPEAssignment.findMany({
       where: {
         ppe: { organizationId: session.user.organizationId },
         expiresAt: { lte: horizonEnd, gte: new Date() },

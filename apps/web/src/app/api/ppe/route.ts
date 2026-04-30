@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
 
-  const ppes = await prisma.ppe.findMany({
+  const ppes = await prisma.pPE.findMany({
     where: {
       organizationId: session.user.organizationId,
       ...(category ? { category } : {}),
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Validation failed", issues: parsed.error.flatten() }, { status: 400 });
   }
 
-  const ppe = await prisma.ppe.create({
+  const ppe = await prisma.pPE.create({
     data: { ...parsed.data, organizationId: session.user.organizationId },
   });
 
