@@ -7,7 +7,7 @@ export class PpeService {
   constructor(private readonly prisma: PrismaService) {}
 
   list(organizationId: string, category?: string) {
-    return this.prisma.client.ppe.findMany({
+    return this.prisma.client.pPE.findMany({
       where: { organizationId, ...(category ? { category } : {}) },
       orderBy: [{ isCritical: "desc" }, { name: "asc" }],
       include: { _count: { select: { assignments: true } } },
@@ -15,7 +15,7 @@ export class PpeService {
   }
 
   async getById(organizationId: string, id: string) {
-    const ppe = await this.prisma.client.ppe.findFirst({
+    const ppe = await this.prisma.client.pPE.findFirst({
       where: { id, organizationId },
       include: {
         assignments: {
@@ -30,7 +30,7 @@ export class PpeService {
   }
 
   async create(organizationId: string, actorId: string, data: PpeCreate) {
-    const ppe = await this.prisma.client.ppe.create({
+    const ppe = await this.prisma.client.pPE.create({
       data: { ...data, organizationId },
     });
     await this.prisma.client.auditLog.create({
@@ -47,9 +47,9 @@ export class PpeService {
   }
 
   async update(organizationId: string, actorId: string, id: string, data: Partial<PpeCreate>) {
-    const before = await this.prisma.client.ppe.findFirst({ where: { id, organizationId } });
+    const before = await this.prisma.client.pPE.findFirst({ where: { id, organizationId } });
     if (!before) throw new NotFoundException();
-    const after = await this.prisma.client.ppe.update({ where: { id }, data });
+    const after = await this.prisma.client.pPE.update({ where: { id }, data });
     await this.prisma.client.auditLog.create({
       data: {
         organizationId,
@@ -65,9 +65,9 @@ export class PpeService {
   }
 
   async remove(organizationId: string, actorId: string, id: string) {
-    const before = await this.prisma.client.ppe.findFirst({ where: { id, organizationId } });
+    const before = await this.prisma.client.pPE.findFirst({ where: { id, organizationId } });
     if (!before) throw new NotFoundException();
-    await this.prisma.client.ppe.delete({ where: { id } });
+    await this.prisma.client.pPE.delete({ where: { id } });
     await this.prisma.client.auditLog.create({
       data: {
         organizationId,
@@ -85,7 +85,7 @@ export class PpeService {
     if (items.length > 500) {
       throw new BadRequestException("Máximo 500 EPPs por import");
     }
-    const result = await this.prisma.client.ppe.createMany({
+    const result = await this.prisma.client.pPE.createMany({
       data: items.map((item) => ({ ...item, organizationId })),
       skipDuplicates: true,
     });
@@ -102,7 +102,7 @@ export class PpeService {
   }
 
   async assign(organizationId: string, actorId: string, data: PpeAssign) {
-    const ppe = await this.prisma.client.ppe.findFirst({
+    const ppe = await this.prisma.client.pPE.findFirst({
       where: { id: data.ppeId, organizationId },
     });
     if (!ppe) throw new NotFoundException("EPP no encontrado en este tenant");
@@ -119,7 +119,7 @@ export class PpeService {
       expiresAt = d;
     }
 
-    const assignment = await this.prisma.client.ppeAssignment.create({
+    const assignment = await this.prisma.client.pPEAssignment.create({
       data: {
         ppeId: data.ppeId,
         userId: data.userId,
@@ -144,14 +144,14 @@ export class PpeService {
   }
 
   async returnAssignment(organizationId: string, actorId: string, assignmentId: string) {
-    const assignment = await this.prisma.client.ppeAssignment.findUnique({
+    const assignment = await this.prisma.client.pPEAssignment.findUnique({
       where: { id: assignmentId },
       include: { ppe: { select: { organizationId: true } } },
     });
     if (!assignment || assignment.ppe.organizationId !== organizationId) {
       throw new NotFoundException();
     }
-    return this.prisma.client.ppeAssignment.update({
+    return this.prisma.client.pPEAssignment.update({
       where: { id: assignmentId },
       data: { returnedAt: new Date() },
     });
@@ -160,7 +160,7 @@ export class PpeService {
   expiring(organizationId: string, days = 30) {
     const horizon = new Date();
     horizon.setDate(horizon.getDate() + days);
-    return this.prisma.client.ppeAssignment.findMany({
+    return this.prisma.client.pPEAssignment.findMany({
       where: {
         ppe: { organizationId },
         returnedAt: null,
@@ -176,7 +176,7 @@ export class PpeService {
   }
 
   byUser(organizationId: string, userId: string) {
-    return this.prisma.client.ppeAssignment.findMany({
+    return this.prisma.client.pPEAssignment.findMany({
       where: {
         userId,
         returnedAt: null,

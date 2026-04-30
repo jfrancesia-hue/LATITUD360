@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const horizon = new Date();
   horizon.setDate(horizon.getDate() + days);
 
-  const assignments = await prisma.ppeAssignment.findMany({
+  const assignments = await prisma.pPEAssignment.findMany({
     where: {
       ppe: { organizationId: session.user.organizationId },
       returnedAt: null,
