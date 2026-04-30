@@ -155,6 +155,78 @@ export const recognitionCreateSchema = z.object({
 });
 export type RecognitionCreate = z.infer<typeof recognitionCreateSchema>;
 
+// ─── PPE (catálogo + asignaciones) ────────────────────────────────
+export const ppeCreateSchema = z.object({
+  name: z.string().min(2).max(120),
+  category: z.enum(["head", "eye", "hand", "foot", "body", "respiratory"]),
+  brand: z.string().max(120).optional(),
+  model: z.string().max(120).optional(),
+  certificationStandard: z.string().max(120).optional(),
+  shelfLifeMonths: z.number().int().min(1).max(240).optional(),
+  stock: z.number().int().min(0).default(0),
+  imageUrl: z.string().url().optional(),
+  isCritical: z.boolean().default(false),
+});
+export type PpeCreate = z.infer<typeof ppeCreateSchema>;
+
+export const ppeAssignSchema = z.object({
+  ppeId: uuid,
+  userId: uuid,
+  expiresAt: isoDate.optional(),
+  signedReceipt: z.boolean().default(false),
+  signatureUrl: z.string().url().optional(),
+});
+export type PpeAssign = z.infer<typeof ppeAssignSchema>;
+
+// ─── Inspections (templates + ejecuciones + findings) ────────────
+export const inspectionTemplateItemSchema = z.object({
+  id: z.string().min(1),
+  question: z.string().min(3).max(500),
+  type: z.enum(["yes_no", "scale", "photo_required", "free_text", "location"]),
+  required: z.boolean().default(true),
+  riskLevel: z.enum(["low", "medium", "high", "critical"]).optional(),
+});
+
+export const inspectionCreateSchema = z.object({
+  siteId: uuid,
+  type: z.string().min(2).max(80), // safety_walk | equipment | environmental | custom
+  scheduledFor: isoDate,
+  template: z.array(inspectionTemplateItemSchema).min(1).max(200),
+});
+export type InspectionCreate = z.infer<typeof inspectionCreateSchema>;
+
+export const inspectionResultSchema = z.object({
+  itemId: z.string().min(1),
+  answer: z.union([z.boolean(), z.number(), z.string()]),
+  photoUrl: z.string().url().optional(),
+  notes: z.string().max(1000).optional(),
+});
+
+export const inspectionCompleteSchema = z.object({
+  results: z.array(inspectionResultSchema).min(1),
+  signatureUrl: z.string().url().optional(),
+});
+export type InspectionComplete = z.infer<typeof inspectionCompleteSchema>;
+
+export const findingCreateSchema = z.object({
+  description: z.string().min(5).max(1000),
+  severity: z.enum(["low", "medium", "high", "critical"]),
+  photoUrl: z.string().url().optional(),
+  assignedToId: uuid.optional(),
+  dueDate: isoDate.optional(),
+});
+export type FindingCreate = z.infer<typeof findingCreateSchema>;
+
+// ─── Profile (Contacto) ───────────────────────────────────────────
+export const profileUpdateSchema = z.object({
+  fullName: z.string().min(2).max(120).optional(),
+  phone: z.string().max(20).optional(),
+  avatarUrl: z.string().url().optional(),
+  jobTitle: z.string().max(120).optional(),
+  birthDate: isoDate.optional(),
+});
+export type ProfileUpdate = z.infer<typeof profileUpdateSchema>;
+
 // ─── Auth ─────────────────────────────────────────────────────────
 export const loginSchema = z.object({
   email: z.string().email(),
