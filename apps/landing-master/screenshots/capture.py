@@ -18,11 +18,9 @@ def main() -> None:
         page = ctx.new_page()
         page.goto(url, wait_until="networkidle", timeout=30_000)
 
-        # Ceremonial intro takes ~3.4s. Wait longer to be safe.
         page.wait_for_timeout(5000)
 
-        # Force IntersectionObserver Reveals to fire by triggering a slow scroll
-        # to bottom and back to top. This mounts every section in the DOM.
+        # Force IntersectionObserver Reveals to fire by triggering a slow scroll.
         height = page.evaluate("document.body.scrollHeight")
         steps = 30
         for i in range(steps + 1):
@@ -32,60 +30,68 @@ def main() -> None:
         page.evaluate("window.scrollTo(0, 0)")
         page.wait_for_timeout(1500)
 
-        # 1) Top of page — masthead + hero
-        page.screenshot(path=str(OUT / "01-masthead-hero.png"), full_page=False)
-        print("  [OK] 01-masthead-hero.png")
+        def shoot(name: str, scroll_js: str = "window.scrollTo(0, 0)") -> None:
+            page.evaluate(scroll_js)
+            page.wait_for_timeout(1000)
+            page.screenshot(path=str(OUT / f"{name}.png"), full_page=False)
+            print(f"  [OK] {name}.png")
 
-        # 2) Gran cronica
-        cronica_y = page.evaluate(
-            "document.getElementById('cronica')?.offsetTop ?? 0"
+        # 1) Top — masthead + hero with cordillera
+        shoot("01-masthead-hero")
+
+        # 2) Primera plana
+        shoot(
+            "02-primera-plana",
+            "document.getElementById('primera-plana').scrollIntoView({block: 'start'})",
         )
-        page.evaluate(f"window.scrollTo(0, {cronica_y})")
-        page.wait_for_timeout(1000)
-        page.screenshot(path=str(OUT / "02-gran-cronica.png"), full_page=False)
-        print("  [OK] 02-gran-cronica.png")
 
-        # 3) Atlas mapa
-        atlas_y = page.evaluate(
-            "document.getElementById('atlas')?.offsetTop ?? 0"
-        )
-        page.evaluate(f"window.scrollTo(0, {atlas_y})")
-        page.wait_for_timeout(1000)
-        page.screenshot(path=str(OUT / "03-atlas-mapa.png"), full_page=False)
-        print("  [OK] 03-atlas-mapa.png")
-
-        # 4) Observatorio de datos — find by heading text
-        obs_y = page.evaluate("""
+        # 3) Sección cinematográfica "La montaña que piensa en agua"
+        shoot(
+            "03-montana-agua",
+            """
             (() => {
-              const headings = Array.from(document.querySelectorAll('h2'));
-              const m = headings.find(h => h.innerText.includes('Lo que la industria'));
-              if (!m) return 0;
-              const sec = m.closest('section');
-              return sec ? sec.offsetTop : 0;
+              const h = Array.from(document.querySelectorAll('h2'))
+                .find(h => h.innerText.includes('montaña que piensa'));
+              if (h) h.closest('section').scrollIntoView({block: 'start'});
             })()
-        """)
-        page.evaluate(f"window.scrollTo(0, {obs_y})")
-        page.wait_for_timeout(1000)
-        page.screenshot(path=str(OUT / "04-observatorio-datos.png"), full_page=False)
-        print("  [OK] 04-observatorio-datos.png")
-
-        # 5) Voces humanas
-        voces_y = page.evaluate(
-            "document.getElementById('voces')?.offsetTop ?? 0"
+            """,
         )
-        page.evaluate(f"window.scrollTo(0, {voces_y})")
-        page.wait_for_timeout(1000)
-        page.screenshot(path=str(OUT / "05-voces-humanas.png"), full_page=False)
-        print("  [OK] 05-voces-humanas.png")
 
-        # 6) Newsletter
-        nl_y = page.evaluate(
-            "document.getElementById('newsletter')?.offsetTop ?? 0"
+        # 4) Gran crónica
+        shoot(
+            "04-gran-cronica",
+            "document.getElementById('cronica').scrollIntoView({block: 'start'})",
         )
-        page.evaluate(f"window.scrollTo(0, {nl_y})")
-        page.wait_for_timeout(1000)
-        page.screenshot(path=str(OUT / "06-newsletter.png"), full_page=False)
-        print("  [OK] 06-newsletter.png")
+
+        # 5) Atlas con brújula
+        shoot(
+            "05-atlas-brujula",
+            "document.getElementById('atlas').scrollIntoView({block: 'start'})",
+        )
+
+        # 6) Voces humanas
+        shoot(
+            "06-voces-humanas",
+            "document.getElementById('voces').scrollIntoView({block: 'start'})",
+        )
+
+        # 7) Audiovisual + Observatorio
+        shoot(
+            "07-audiovisual-observatorio",
+            "document.getElementById('audiovisual').scrollIntoView({block: 'start'})",
+        )
+
+        # 8) Archivo memoria
+        shoot(
+            "08-archivo",
+            "document.getElementById('archivo').scrollIntoView({block: 'start'})",
+        )
+
+        # 9) Newsletter + footer
+        shoot(
+            "09-newsletter-footer",
+            "document.getElementById('newsletter').scrollIntoView({block: 'start'})",
+        )
 
         # Bonus: full-page mosaic
         page.evaluate("window.scrollTo(0, 0)")

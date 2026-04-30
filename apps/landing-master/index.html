@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LATITUD360 — Memoria de la minería del NOA</title>
+  <title>LATITUD360 — Territorio, memoria y futuro</title>
   <meta name="description" content="Una crónica editorial de la minería del Triángulo del Litio. Construida desde Catamarca para la operación, la comunidad y el archivo del NOA argentino.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -16,13 +16,16 @@
       theme: {
         extend: {
           colors: {
-            'azul-profundo':       '#081826',
+            'azul-profundo':       '#0B1B2C',
+            'azul-noche':          '#0F2438',
             'azul-institucional':  '#12385B',
             'azul-mineral':        '#5E86A8',
             'cobre':               '#B8754A',
+            'cobre-suave':         '#D4956D',
             'oro-viejo':           '#C2A56D',
             'papel':               '#F5F1EA',
             'papel-sombra':        '#EDE6D9',
+            'papel-tinta':         '#E5DDC9',
             'gris-roca':           '#8C949C',
             'tinta':               '#161616',
           },
@@ -33,6 +36,7 @@
           },
           letterSpacing: {
             'institutional': '0.18em',
+            'masthead':      '0.32em',
           }
         }
       }
@@ -43,8 +47,7 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
 
-  <!-- Motion shim local — emula la API de framer-motion (motion.X, AnimatePresence)
-       sobre Web Animations API. Evita el CDN UMD roto de framer-motion 11+. -->
+  <!-- Motion shim local — emula API framer-motion sobre Web Animations API. -->
   <script>
   (() => {
     const buildTransform = (obj) => {
@@ -82,7 +85,6 @@
       if (times && length === times.length) frames.forEach((f, i) => f.offset = times[i]);
       return frames;
     };
-    const styleFromObj = (obj) => buildFrame(obj || {});
 
     const cache = {};
     const create = (Tag) => {
@@ -110,10 +112,8 @@
             easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
             linear: 'linear',
           };
-          const easeRaw = transition.ease;
-          const easing = Array.isArray(easeRaw)
-            ? `cubic-bezier(${easeRaw.join(',')})`
-            : (easings[easeRaw] || easeRaw || easings.easeOut);
+          const e = transition.ease;
+          const easing = Array.isArray(e) ? `cubic-bezier(${e.join(',')})` : (easings[e] || e || easings.easeOut);
           try {
             el.animate(frames, {
               duration: (transition.duration ?? 0.5) * 1000,
@@ -121,10 +121,10 @@
               easing,
               fill: 'forwards',
             });
-          } catch (e) { /* noop */ }
+          } catch (e) {}
         }, [JSON.stringify(animate)]);
 
-        const initialStyle = initial ? styleFromObj(initial) : {};
+        const initialStyle = initial ? buildFrame(initial) : {};
         return React.createElement(Tag, {
           ref: setRef,
           style: { ...initialStyle, ...styleProp },
@@ -135,13 +135,8 @@
       cache[Tag] = Comp;
       return Comp;
     };
-
     const motion = new Proxy({}, { get: (_, tag) => create(typeof tag === 'string' ? tag : 'div') });
-
-    // AnimatePresence simplificado: passthrough. Sin exit animations
-    // (suficiente para el caso de la intro ceremonial y los swaps del atlas).
     const AnimatePresence = ({ children }) => React.createElement(React.Fragment, null, children);
-
     window.Motion = { motion, AnimatePresence };
   })();
   </script>
@@ -155,8 +150,6 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
-
-    /* Textura sutil de papel — un grano fino casi imperceptible */
     .paper-texture {
       background-image:
         radial-gradient(rgba(22, 22, 22, 0.025) 1px, transparent 1px),
@@ -164,39 +157,33 @@
       background-size: 4px 4px, 7px 7px;
       background-position: 0 0, 2px 2px;
     }
-
-    /* Bloque editorial con borde-marco fino tipo placa de museo */
     .museum-block {
       border: 1px solid rgba(22, 22, 22, 0.12);
       background-color: #F5F1EA;
     }
-
-    /* Línea decorativa con doble trazo tipo periódico */
+    .editorial-rule-thick {
+      border-top: 2px solid #161616;
+      box-shadow: 0 4px 0 -2px #161616;
+    }
     .editorial-rule {
       border-top: 1px solid #161616;
       box-shadow: 0 3px 0 -2px #161616;
     }
+    .copper-rule { border-top: 1px solid #B8754A; }
 
     /* Drop cap monumental */
     .drop-cap::first-letter {
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
       font-weight: 400;
-      font-size: 5rem;
+      font-size: 5.5rem;
       line-height: 0.85;
       float: left;
       padding: 0.4rem 0.6rem 0 0;
       color: #B8754A;
     }
 
-    /* Líneas topográficas SVG — patrón sutil */
-    .topo-pattern {
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='none' stroke='%2312385B' stroke-width='0.4' stroke-opacity='0.15'><circle cx='100' cy='100' r='30'/><circle cx='100' cy='100' r='50'/><circle cx='100' cy='100' r='70'/><circle cx='100' cy='100' r='90'/></g></svg>");
-      background-repeat: repeat;
-      background-size: 220px 220px;
-    }
-
-    /* Hover ceremonial — leve subrayado largo */
+    /* Hover ceremonial */
     .editorial-link {
       position: relative;
       display: inline-block;
@@ -214,7 +201,6 @@
     }
     .editorial-link:hover::after { width: 100%; }
 
-    /* Caption italic estilo museo */
     .museum-caption {
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
@@ -222,18 +208,38 @@
       color: rgba(22, 22, 22, 0.7);
     }
 
-    /* Marquee/ticker animation */
     @keyframes marquee {
       0%   { transform: translateX(0); }
       100% { transform: translateX(-50%); }
     }
-    .ticker-track {
-      animation: marquee 60s linear infinite;
+    .ticker-track { animation: marquee 70s linear infinite; }
+
+    /* Compass rose decorative */
+    @keyframes slow-rotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .compass-glow {
+      animation: slow-rotate 200s linear infinite;
+      transform-origin: center;
     }
 
-    /* Selección de texto */
     ::selection { background-color: #B8754A; color: #F5F1EA; }
     ::-moz-selection { background-color: #B8754A; color: #F5F1EA; }
+
+    /* Doble línea decorativa */
+    .double-line {
+      border-top: 1px solid #161616;
+      border-bottom: 1px solid #161616;
+      height: 4px;
+    }
+
+    /* Filigrana decorativa */
+    .filigrana {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      letter-spacing: 0.4em;
+    }
   </style>
 </head>
 <body>
@@ -241,15 +247,18 @@
 
   <script type="text/babel" data-presets="env,react">
     const { motion, AnimatePresence } = window.Motion;
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
-    const Reveal = ({ children, delay = 0, y = 30 }) => {
-      const ref = React.useRef(null);
+    // ═══════════════════════════════════════════════════════════════
+    //  HELPERS
+    // ═══════════════════════════════════════════════════════════════
+    const Reveal = ({ children, delay = 0, y = 30, className = "" }) => {
+      const ref = useRef(null);
       const [visible, setVisible] = useState(false);
       useEffect(() => {
         const obs = new IntersectionObserver(
           ([e]) => e.isIntersecting && setVisible(true),
-          { threshold: 0.15 },
+          { threshold: 0.1 },
         );
         if (ref.current) obs.observe(ref.current);
         return () => obs.disconnect();
@@ -257,6 +266,7 @@
       return (
         <motion.div
           ref={ref}
+          className={className}
           initial={{ opacity: 0, y }}
           animate={visible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay }}
@@ -267,178 +277,359 @@
     };
 
     const SmallCaps = ({ children, className = "" }) => (
-      <span className={`uppercase tracking-institutional text-xs font-medium ${className}`}>
+      <span className={`uppercase tracking-institutional text-[11px] font-medium ${className}`}>
         {children}
       </span>
     );
 
-    const HorizontalRule = ({ className = "" }) => (
-      <div className={`flex items-center gap-3 my-6 ${className}`}>
-        <div className="flex-1 h-px bg-tinta/15" />
-        <div className="w-1 h-1 rounded-full bg-cobre" />
-        <div className="flex-1 h-px bg-tinta/15" />
+    const OrnamentalDivider = () => (
+      <div className="flex items-center justify-center gap-4 my-3 text-cobre">
+        <div className="w-12 h-px bg-cobre/60" />
+        <span className="text-xs">✦</span>
+        <div className="w-12 h-px bg-cobre/60" />
       </div>
     );
 
-    // 1. INTRO CEREMONIAL
-    const IntroCeremonial = ({ onDone }) => {
-      const [phase, setPhase] = useState(0);
-      useEffect(() => {
-        const t1 = setTimeout(() => setPhase(1), 800);
-        const t2 = setTimeout(() => setPhase(2), 2200);
-        const t3 = setTimeout(() => onDone && onDone(), 3400);
-        return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-      }, []);
+    // ═══════════════════════════════════════════════════════════════
+    //  IMÁGENES SVG DOCUMENTALES (offline, sin URLs externas)
+    // ═══════════════════════════════════════════════════════════════
+    const PaisajeCordillera = ({ className = "" }) => (
+      <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" className={className}>
+        <defs>
+          <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#1a3a5c"/>
+            <stop offset="50%"  stopColor="#2d5278"/>
+            <stop offset="100%" stopColor="#7a8aa3"/>
+          </linearGradient>
+          <linearGradient id="far-mountain" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#3d5870" stopOpacity="0.9"/>
+            <stop offset="100%" stopColor="#1a2a3e"/>
+          </linearGradient>
+          <linearGradient id="mid-mountain" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#1f3045"/>
+            <stop offset="100%" stopColor="#0a1626"/>
+          </linearGradient>
+          <linearGradient id="near-valley" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#2c3a4a"/>
+            <stop offset="100%" stopColor="#080d18"/>
+          </linearGradient>
+          <linearGradient id="river" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#5E86A8" stopOpacity="0.6"/>
+            <stop offset="100%" stopColor="#C2A56D" stopOpacity="0.3"/>
+          </linearGradient>
+          <radialGradient id="sun-glow" cx="0.7" cy="0.3" r="0.4">
+            <stop offset="0%" stopColor="#C2A56D" stopOpacity="0.5"/>
+            <stop offset="100%" stopColor="transparent"/>
+          </radialGradient>
+        </defs>
+        <rect width="1200" height="800" fill="url(#sky)"/>
+        <rect width="1200" height="800" fill="url(#sun-glow)"/>
+        {/* Cordillera lejana */}
+        <path d="M 0 300 L 80 250 L 160 280 L 240 240 L 320 270 L 400 230 L 480 260 L 560 220 L 640 250 L 720 210 L 800 240 L 880 200 L 960 230 L 1040 200 L 1120 230 L 1200 210 L 1200 800 L 0 800 Z" fill="url(#far-mountain)"/>
+        {/* Cordillera media */}
+        <path d="M 0 420 L 100 360 L 180 400 L 280 350 L 360 380 L 460 330 L 540 370 L 640 320 L 720 360 L 820 310 L 900 350 L 1000 320 L 1100 360 L 1200 340 L 1200 800 L 0 800 Z" fill="url(#mid-mountain)"/>
+        {/* Valle cercano con río */}
+        <path d="M 0 560 L 120 500 L 240 540 L 360 480 L 480 520 L 600 470 L 720 510 L 840 460 L 960 500 L 1080 470 L 1200 500 L 1200 800 L 0 800 Z" fill="url(#near-valley)"/>
+        {/* Río serpenteante */}
+        <path d="M 580 540 Q 600 580 620 620 Q 600 650 580 700 Q 560 730 540 800" stroke="url(#river)" strokeWidth="6" fill="none" opacity="0.8"/>
+        <path d="M 600 560 Q 620 600 640 640 Q 620 670 600 720 Q 580 760 560 800" stroke="url(#river)" strokeWidth="3" fill="none" opacity="0.5"/>
+        {/* Niebla */}
+        <ellipse cx="400" cy="500" rx="300" ry="40" fill="white" opacity="0.08"/>
+        <ellipse cx="800" cy="540" rx="350" ry="35" fill="white" opacity="0.06"/>
+        {/* Aves lejanas */}
+        <path d="M 850 180 Q 855 175 860 180 M 858 180 Q 863 175 868 180" stroke="white" strokeWidth="1.2" fill="none" opacity="0.5"/>
+        <path d="M 920 200 Q 924 196 928 200" stroke="white" strokeWidth="1" fill="none" opacity="0.4"/>
+      </svg>
+    );
 
+    const PaisajeSalar = ({ className = "" }) => (
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" className={className}>
+        <defs>
+          <linearGradient id="dusk" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#3a4862"/>
+            <stop offset="50%"  stopColor="#7a6a5a"/>
+            <stop offset="100%" stopColor="#C2A56D" stopOpacity="0.8"/>
+          </linearGradient>
+          <pattern id="brine-pat" x="0" y="0" width="80" height="50" patternUnits="userSpaceOnUse">
+            <rect width="80" height="50" fill="#5E86A8" opacity="0.5"/>
+            <rect x="2" y="2" width="76" height="46" fill="#12385B" opacity="0.35"/>
+          </pattern>
+        </defs>
+        <rect width="1200" height="700" fill="url(#dusk)"/>
+        {/* Cordillera al horizonte */}
+        <path d="M 0 260 L 100 220 L 200 250 L 300 210 L 400 240 L 500 215 L 600 240 L 700 210 L 800 235 L 900 215 L 1000 245 L 1100 220 L 1200 250 L 1200 350 L 0 350 Z" fill="#1a2538" opacity="0.85"/>
+        {/* Salar — piletones de evaporación */}
+        <rect x="0" y="350" width="1200" height="350" fill="url(#brine-pat)"/>
+        <g stroke="#F5F1EA" strokeOpacity="0.18" strokeWidth="1.5" fill="none">
+          <rect x="50"  y="380" width="280" height="180"/>
+          <rect x="370" y="380" width="320" height="220"/>
+          <rect x="730" y="400" width="280" height="200"/>
+          <rect x="1050" y="380" width="150" height="220"/>
+          <rect x="80"  y="600" width="240" height="100"/>
+          <rect x="370" y="620" width="280" height="80"/>
+          <rect x="700" y="620" width="320" height="80"/>
+        </g>
+        {/* Reflejo del cielo */}
+        <rect x="0" y="350" width="1200" height="100" fill="url(#dusk)" opacity="0.25"/>
+      </svg>
+    );
+
+    const RetratoSilueta = ({ initials, className = "" }) => (
+      <svg viewBox="0 0 200 240" className={className}>
+        <defs>
+          <linearGradient id={`portrait-${initials}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor="#12385B"/>
+            <stop offset="100%" stopColor="#0B1B2C"/>
+          </linearGradient>
+        </defs>
+        <rect width="200" height="240" fill={`url(#portrait-${initials})`}/>
+        {/* Silueta cabeza */}
+        <ellipse cx="100" cy="100" rx="44" ry="50" fill="#F5F1EA" opacity="0.18"/>
+        {/* Hombros */}
+        <path d="M 30 240 Q 30 175 100 165 Q 170 175 170 240 Z" fill="#F5F1EA" opacity="0.12"/>
+        {/* Iniciales */}
+        <text x="100" y="115" textAnchor="middle" fontSize="36" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fill="#B8754A" opacity="0.95">{initials}</text>
+        {/* Marco hairline */}
+        <rect x="3" y="3" width="194" height="234" fill="none" stroke="#B8754A" strokeWidth="0.5" strokeOpacity="0.5"/>
+      </svg>
+    );
+
+    const ThumbnailEditorial = ({ kind, className = "" }) => {
+      // 'mountain' | 'salt' | 'mineral' | 'people' | 'data' | 'book'
+      const palette = {
+        mountain: ['#0B1B2C', '#1a3045', '#3d5870'],
+        salt:     ['#12385B', '#5E86A8', '#C2A56D'],
+        mineral:  ['#0F2438', '#B8754A', '#D4956D'],
+        people:   ['#0B1B2C', '#12385B', '#C2A56D'],
+        data:     ['#161616', '#12385B', '#B8754A'],
+        book:     ['#0F2438', '#5E4830', '#C2A56D'],
+      }[kind] || ['#0B1B2C', '#12385B', '#C2A56D'];
       return (
-        <AnimatePresence>
-          {phase < 2 && (
-            <motion.div
-              key="intro"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 1 } }}
-              className="fixed inset-0 z-50 bg-papel paper-texture flex flex-col items-center justify-center"
-            >
-              <motion.div
-                initial={{ opacity: 0, letterSpacing: '1em' }}
-                animate={{ opacity: 1, letterSpacing: '0.4em' }}
-                transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-                className="font-display text-tinta uppercase font-light text-sm md:text-base"
-              >
-                LATITUD ⬩ TRESCIENTOS SESENTA
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scaleY: 0 }}
-                animate={{ opacity: phase >= 1 ? 1 : 0, scaleY: phase >= 1 ? 1 : 0 }}
-                transition={{ duration: 1, delay: 0.6 }}
-                className="my-8 w-px h-20 bg-cobre origin-top"
-              />
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: phase >= 1 ? 1 : 0 }}
-                transition={{ duration: 0.8, delay: 1.4 }}
-                className="font-display italic text-tinta/80 text-base md:text-lg max-w-md text-center px-6"
-              >
-                Memoria de la minería del NOA.
-              </motion.div>
-            </motion.div>
+        <svg viewBox="0 0 300 200" className={className}>
+          <defs>
+            <linearGradient id={`thumb-${kind}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stopColor={palette[0]}/>
+              <stop offset="60%"  stopColor={palette[1]}/>
+              <stop offset="100%" stopColor={palette[2]}/>
+            </linearGradient>
+          </defs>
+          <rect width="300" height="200" fill={`url(#thumb-${kind})`}/>
+          {kind === 'mountain' && (
+            <>
+              <path d="M 0 130 L 50 100 L 100 120 L 150 90 L 200 110 L 250 80 L 300 100 L 300 200 L 0 200 Z" fill={palette[0]} opacity="0.7"/>
+              <path d="M 0 150 L 60 130 L 120 145 L 180 125 L 240 145 L 300 130 L 300 200 L 0 200 Z" fill={palette[0]}/>
+            </>
           )}
-        </AnimatePresence>
+          {kind === 'salt' && (
+            <g stroke="#F5F1EA" strokeOpacity="0.25" strokeWidth="1" fill="none">
+              <rect x="20" y="40" width="80" height="50"/>
+              <rect x="110" y="40" width="100" height="60"/>
+              <rect x="220" y="50" width="60" height="50"/>
+              <rect x="30" y="110" width="80" height="50"/>
+              <rect x="130" y="120" width="100" height="50"/>
+            </g>
+          )}
+          {kind === 'mineral' && (
+            <g fill="#F5F1EA" fillOpacity="0.15">
+              <polygon points="80,60 130,80 110,140 60,120"/>
+              <polygon points="170,40 230,80 200,150 140,130"/>
+            </g>
+          )}
+          {kind === 'people' && (
+            <>
+              <ellipse cx="100" cy="100" rx="20" ry="22" fill="#F5F1EA" opacity="0.2"/>
+              <ellipse cx="200" cy="110" rx="22" ry="24" fill="#F5F1EA" opacity="0.2"/>
+              <path d="M 60 200 Q 60 160 100 155 Q 140 160 140 200 Z" fill="#F5F1EA" opacity="0.12"/>
+              <path d="M 160 200 Q 160 165 200 160 Q 240 165 240 200 Z" fill="#F5F1EA" opacity="0.12"/>
+            </>
+          )}
+          {kind === 'data' && (
+            <g fill="#F5F1EA" fillOpacity="0.5">
+              <rect x="40" y="120" width="20" height="40"/>
+              <rect x="80" y="100" width="20" height="60"/>
+              <rect x="120" y="80" width="20" height="80"/>
+              <rect x="160" y="60" width="20" height="100"/>
+              <rect x="200" y="90" width="20" height="70"/>
+              <rect x="240" y="110" width="20" height="50"/>
+            </g>
+          )}
+          {kind === 'book' && (
+            <g fill="#F5F1EA" fillOpacity="0.2" stroke="#F5F1EA" strokeOpacity="0.4" strokeWidth="0.5">
+              <rect x="80" y="50" width="140" height="100"/>
+              <line x1="150" y1="50" x2="150" y2="150"/>
+              <line x1="100" y1="80" x2="140" y2="80"/>
+              <line x1="100" y1="100" x2="140" y2="100"/>
+              <line x1="160" y1="80" x2="200" y2="80"/>
+              <line x1="160" y1="100" x2="200" y2="100"/>
+            </g>
+          )}
+          <rect x="2" y="2" width="296" height="196" fill="none" stroke="#B8754A" strokeWidth="0.5" strokeOpacity="0.4"/>
+        </svg>
       );
     };
 
-    // 2. MASTHEAD
+    const CompasRosa = ({ size = 140, className = "" }) => (
+      <svg viewBox="0 0 200 200" width={size} height={size} className={className}>
+        <defs>
+          <radialGradient id="compass-gold" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#D4956D"/>
+            <stop offset="60%"  stopColor="#B8754A"/>
+            <stop offset="100%" stopColor="#5E4830"/>
+          </radialGradient>
+        </defs>
+        <g className="compass-glow">
+          <circle cx="100" cy="100" r="92" fill="none" stroke="#B8754A" strokeWidth="0.8" opacity="0.3"/>
+          <circle cx="100" cy="100" r="82" fill="none" stroke="#B8754A" strokeWidth="0.5" opacity="0.4" strokeDasharray="2 4"/>
+        </g>
+        <circle cx="100" cy="100" r="68" fill="none" stroke="#B8754A" strokeWidth="1" opacity="0.65"/>
+        <circle cx="100" cy="100" r="55" fill="none" stroke="#B8754A" strokeWidth="0.5" opacity="0.5"/>
+        {/* 8 puntos cardinales */}
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+          <line key={i}
+                x1="100" y1="100"
+                x2={100 + 68 * Math.cos((angle - 90) * Math.PI / 180)}
+                y2={100 + 68 * Math.sin((angle - 90) * Math.PI / 180)}
+                stroke="#B8754A" strokeWidth={i % 2 === 0 ? 1 : 0.4} opacity="0.5"/>
+        ))}
+        {/* Estrella de compás (4 picos) */}
+        <polygon points="100,28 110,100 100,172 90,100" fill="url(#compass-gold)"/>
+        <polygon points="28,100 100,110 172,100 100,90" fill="url(#compass-gold)" opacity="0.85"/>
+        {/* Diamantes diagonales */}
+        <polygon points="100,55 105,100 100,145 95,100" fill="#B8754A" opacity="0.5"/>
+        {/* Centro */}
+        <circle cx="100" cy="100" r="6" fill="#0B1B2C"/>
+        <circle cx="100" cy="100" r="3" fill="#C2A56D"/>
+        {/* Letras N/S/E/O */}
+        <text x="100" y="22" textAnchor="middle" fontSize="11" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fontWeight="600" fill="#B8754A">N</text>
+        <text x="100" y="190" textAnchor="middle" fontSize="11" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fontWeight="600" fill="#B8754A" opacity="0.7">S</text>
+        <text x="184" y="105" textAnchor="middle" fontSize="11" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fontWeight="600" fill="#B8754A" opacity="0.7">E</text>
+        <text x="14"  y="105" textAnchor="middle" fontSize="11" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fontWeight="600" fill="#B8754A" opacity="0.7">O</text>
+      </svg>
+    );
+
+    // ═══════════════════════════════════════════════════════════════
+    //  1. MASTHEAD MONUMENTAL
+    // ═══════════════════════════════════════════════════════════════
     const Masthead = () => {
       const today = new Date().toLocaleDateString('es-AR', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
       });
       return (
-        <header className="paper-texture border-b border-tinta">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-10 pt-6 pb-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 items-end gap-4 md:gap-8 text-tinta">
-              <div className="font-mono text-[11px] uppercase tracking-institutional text-tinta/70 order-2 md:order-1 text-left">
-                Año I · No. 1<br/>
-                Catamarca · Argentina
+        <header className="paper-texture border-b-2 border-tinta">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10">
+            {/* Top strip */}
+            <div className="flex items-center justify-between pt-3 pb-2 border-b border-tinta/20 font-mono text-[10px] uppercase tracking-institutional text-tinta/60">
+              <div>Año I · No. 1 · Edición fundacional</div>
+              <div className="hidden md:block">Catamarca · Argentina · NOA</div>
+              <div>{today}</div>
+            </div>
+
+            {/* Main masthead */}
+            <div className="grid grid-cols-1 md:grid-cols-3 items-end gap-8 py-7">
+              <div className="hidden md:block font-mono text-[11px] uppercase tracking-institutional text-tinta/70 leading-relaxed">
+                <div>SECCIONES</div>
+                <div className="mt-2 space-y-0.5 text-tinta/55 normal-case font-body tracking-normal text-[11px]">
+                  <div>Crónica · Atlas · Voces</div>
+                  <div>Audiovisual · Datos · Archivo</div>
+                </div>
               </div>
-              <div className="order-1 md:order-2 text-center">
-                <div className="font-display italic text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight">
+
+              <div className="text-center">
+                <div className="filigrana text-cobre text-[10px]">⊹ ⊹ ⊹</div>
+                <h1 className="font-display italic text-tinta leading-none tracking-tight text-[64px] md:text-[88px] lg:text-[104px] mt-1 mb-1">
                   Latitud<span className="text-cobre">360</span>
-                </div>
-                <div className="mt-2 font-mono text-[10px] uppercase tracking-institutional text-tinta/60">
-                  Crónica · Operación · Territorio
+                </h1>
+                <div className="filigrana uppercase text-tinta/70 text-[11px] tracking-masthead">
+                  Memoria · Operación · Territorio
                 </div>
               </div>
-              <div className="font-mono text-[11px] uppercase tracking-institutional text-tinta/70 order-3 text-right">
-                {today}<br/>
-                Salar · -2°C · Viento NO 18 km/h
+
+              <div className="text-right font-mono text-[11px] uppercase tracking-institutional text-tinta/70 leading-relaxed">
+                <div className="text-tinta font-display italic text-2xl normal-case tracking-normal">-2°</div>
+                <div className="mt-1">Salar Hombre Muerto</div>
+                <div className="text-tinta/55">Viento NO 18 km/h · 4000 msnm</div>
               </div>
             </div>
-            <div className="mt-4 editorial-rule"></div>
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-institutional text-tinta/65">
-              <div>Lat. 25°S · Long. 67°O · Altitud 4000 m</div>
-              <div className="hidden md:flex gap-5">
+
+            {/* Double rule */}
+            <div className="double-line" />
+
+            {/* Nav */}
+            <nav className="flex flex-wrap items-center justify-between gap-3 py-3 font-mono text-[11px] uppercase tracking-institutional text-tinta/65">
+              <div className="flex flex-wrap gap-5">
                 <a href="#hero" className="editorial-link">Sumario</a>
+                <a href="#primera-plana" className="editorial-link">Primera plana</a>
                 <a href="#cronica" className="editorial-link">Crónica</a>
                 <a href="#atlas" className="editorial-link">Atlas</a>
                 <a href="#voces" className="editorial-link">Voces</a>
+                <a href="#audiovisual" className="editorial-link">Audiovisual</a>
                 <a href="#archivo" className="editorial-link">Archivo</a>
-                <a href="#newsletter" className="editorial-link text-cobre">Suscribirse</a>
               </div>
-              <div className="text-right">Litio · Oro · Cobre · Salares</div>
-            </div>
+              <a href="#newsletter" className="editorial-link text-cobre font-medium">
+                Suscribirme →
+              </a>
+            </nav>
           </div>
         </header>
       );
     };
 
-    // 3. HERO MONUMENTAL 50/50
+    // ═══════════════════════════════════════════════════════════════
+    //  2. HERO MONUMENTAL CON PAISAJE
+    // ═══════════════════════════════════════════════════════════════
     const HeroMonumental = () => (
-      <section id="hero" className="relative paper-texture">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-16 md:py-28">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <div>
-              <Reveal>
+      <section id="hero" className="relative">
+        {/* Foto cordillera full-bleed top */}
+        <div className="relative h-[420px] md:h-[520px] overflow-hidden">
+          <PaisajeCordillera className="absolute inset-0 w-full h-full" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-papel"></div>
+          <figcaption className="absolute bottom-6 right-8 museum-caption text-papel/85 text-sm">
+            «Cordillera al amanecer» — fotograbado documental, NOA
+          </figcaption>
+        </div>
+
+        {/* Texto monumental sobre papel */}
+        <div className="relative paper-texture -mt-32">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10 pt-8 pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+              <Reveal className="lg:col-span-7 lg:col-start-1">
                 <SmallCaps className="text-cobre">N° 1 · Edición fundacional · Abril 2026</SmallCaps>
+                <h2 className="mt-5 font-display italic font-light text-tinta leading-[0.92] tracking-tight text-5xl md:text-6xl lg:text-[88px]">
+                  Territorio,<br/>
+                  memoria<br/>
+                  <span className="text-cobre">y futuro.</span>
+                </h2>
               </Reveal>
-              <Reveal delay={0.2}>
-                <h1 className="mt-6 font-display italic font-light text-tinta leading-[0.92] tracking-tight text-5xl md:text-6xl lg:text-7xl">
-                  El sistema operativo<br/>
-                  de la minería<br/>
-                  <span className="text-cobre">del NOA argentino.</span>
-                </h1>
-              </Reveal>
-              <Reveal delay={0.5}>
-                <div className="editorial-rule my-10 max-w-xs"></div>
-              </Reveal>
-              <Reveal delay={0.7}>
-                <p className="font-body text-tinta/80 text-base md:text-lg leading-relaxed max-w-xl">
-                  Latitud360 es una plataforma operativa, una memoria editorial y un atlas vivo. Nace en Catamarca para acompañar a las mineras del Triángulo del Litio en su operación cotidiana, su comunicación con la comunidad y la trazabilidad pública de su impacto.
-                </p>
-              </Reveal>
-              <Reveal delay={0.9}>
-                <div className="mt-10 flex flex-wrap items-center gap-6">
-                  <a href="#newsletter" className="inline-flex items-center gap-3 px-7 py-3 bg-azul-institucional text-papel font-medium tracking-wide hover:bg-azul-profundo transition-colors duration-500">
-                    Solicitar dossier
-                    <span className="opacity-60">→</span>
-                  </a>
-                  <a href="#cronica" className="editorial-link font-display italic text-tinta text-lg">
-                    Leer la crónica fundacional
-                  </a>
+
+              <Reveal delay={0.4} className="lg:col-span-5 self-end">
+                <div>
+                  <div className="copper-rule mb-6 max-w-[120px]"></div>
+                  <p className="font-display italic text-tinta/85 text-xl md:text-2xl leading-snug">
+                    Una crónica editorial de la minería del Triángulo del Litio, construida desde Catamarca para la operación, la comunidad y el archivo del NOA argentino.
+                  </p>
+                  <p className="mt-6 font-body text-tinta/70 text-base leading-relaxed">
+                    Latitud360 unifica plataforma operativa, comunicación interna y medio editorial en una sola institución digital. Lo que la minería argentina hacía con planillas, ahora se documenta y se publica.
+                  </p>
+                  <div className="mt-8 flex flex-wrap items-center gap-6">
+                    <a href="#newsletter" className="inline-flex items-center gap-3 px-7 py-3 bg-azul-institucional text-papel font-medium tracking-wide hover:bg-azul-profundo transition-colors duration-500">
+                      Solicitar dossier
+                      <span className="opacity-70">→</span>
+                    </a>
+                    <a href="#cronica" className="editorial-link font-display italic text-tinta text-lg">
+                      Leer la crónica fundacional
+                    </a>
+                  </div>
                 </div>
               </Reveal>
             </div>
-
-            <Reveal delay={0.4} y={50}>
-              <figure className="relative">
-                <div className="aspect-[4/5] bg-azul-profundo overflow-hidden relative">
-                  <div className="absolute inset-0 topo-pattern opacity-60"></div>
-                  <div className="absolute inset-0 bg-gradient-to-b from-azul-profundo/30 via-azul-institucional/40 to-azul-profundo/80"></div>
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice">
-                    <defs>
-                      <linearGradient id="moon" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#C2A56D" stopOpacity="0.9"/>
-                        <stop offset="100%" stopColor="#B8754A" stopOpacity="0.4"/>
-                      </linearGradient>
-                    </defs>
-                    <path d="M 0 380 L 60 320 L 110 350 L 180 280 L 230 310 L 290 250 L 340 290 L 400 240 L 400 500 L 0 500 Z" fill="#081826" opacity="0.7"/>
-                    <path d="M 0 420 L 80 380 L 140 400 L 220 350 L 280 380 L 340 340 L 400 360 L 400 500 L 0 500 Z" fill="#161616" opacity="0.85"/>
-                    <circle cx="290" cy="200" r="55" fill="url(#moon)" opacity="0.85"/>
-                    <line x1="290" y1="380" x2="290" y2="450" stroke="#C2A56D" strokeWidth="1" opacity="0.4"/>
-                    <line x1="270" y1="395" x2="310" y2="395" stroke="#C2A56D" strokeWidth="0.6" opacity="0.3"/>
-                    <line x1="278" y1="410" x2="302" y2="410" stroke="#C2A56D" strokeWidth="0.6" opacity="0.25"/>
-                  </svg>
-                </div>
-                <figcaption className="mt-4 museum-caption text-sm">
-                  «Salar del Hombre Muerto al amanecer» — fotograbado documental, Catamarca, abril 2026.
-                </figcaption>
-              </figure>
-            </Reveal>
           </div>
         </div>
       </section>
     );
 
-    // 4. TICKER EDITORIAL
+    // ═══════════════════════════════════════════════════════════════
+    //  3. TICKER EDITORIAL
+    // ═══════════════════════════════════════════════════════════════
     const TickerEditorial = () => {
       const items = [
         "Récord histórico: 127 días sin accidentes con tiempo perdido en Mina Hombre Muerto",
@@ -446,16 +637,15 @@
         "Cumbre de Litio Catamarca convoca a 12 países productores",
         "MARA + Agua Rica anuncia inversión USD 4.500 millones para 27 años de operación",
         "Programa Pioneros NOA cierra con 6 contratos firmados antes de Q3",
-        "Nuevo observatorio ambiental lanza monitoreo en tiempo real del salar",
       ];
-      const repeated = [...items, ...items];
+      const repeated = [...items, ...items, ...items];
       return (
         <section className="bg-cobre text-papel border-y border-tinta/30 overflow-hidden">
           <div className="flex items-center">
             <div className="px-6 py-3 bg-tinta text-papel font-mono text-[11px] uppercase tracking-institutional whitespace-nowrap">
               ⬩ Boletín en vivo
             </div>
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden">
               <div className="ticker-track flex items-center whitespace-nowrap">
                 {repeated.map((item, i) => (
                   <span key={i} className="font-display italic text-base md:text-lg px-8 flex items-center gap-3">
@@ -470,75 +660,135 @@
       );
     };
 
-    // 5. PRIMERA PLANA
-    const PrimeraPlana = () => (
-      <section className="paper-texture border-b border-tinta/10">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
-          <Reveal>
-            <div className="flex items-center justify-between mb-10">
-              <SmallCaps className="text-cobre">Primera plana · Edición fundacional</SmallCaps>
-              <span className="font-mono text-[10px] uppercase tracking-institutional text-tinta/50">Pág. 03</span>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14">
-            <Reveal delay={0.2}>
-              <figure className="lg:col-span-7">
-                <div className="aspect-[16/10] relative overflow-hidden bg-azul-institucional">
-                  <div className="absolute inset-0 topo-pattern opacity-30"></div>
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
-                    <defs>
-                      <pattern id="brine" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-                        <rect width="60" height="60" fill="#5E86A8" opacity="0.6"/>
-                        <rect x="2" y="2" width="56" height="56" fill="#12385B" opacity="0.4"/>
-                      </pattern>
-                    </defs>
-                    <rect width="800" height="500" fill="url(#brine)"/>
-                    <g stroke="#F5F1EA" strokeOpacity="0.15" strokeWidth="1" fill="none">
-                      <rect x="60"  y="60"  width="180" height="120"/>
-                      <rect x="260" y="60"  width="220" height="180"/>
-                      <rect x="500" y="80"  width="240" height="160"/>
-                      <rect x="80"  y="200" width="160" height="140"/>
-                      <rect x="260" y="260" width="200" height="160"/>
-                      <rect x="480" y="260" width="260" height="180"/>
-                    </g>
-                    <rect x="380" y="220" width="14" height="6" fill="#B8754A"/>
-                  </svg>
-                </div>
-                <figcaption className="mt-3 museum-caption text-sm">
-                  «Geometría del litio» — vista aérea de los piletones de evaporación, Salar del Hombre Muerto.
-                </figcaption>
-              </figure>
+    // ═══════════════════════════════════════════════════════════════
+    //  4. PRIMERA PLANA — GRID COMPLEJO
+    // ═══════════════════════════════════════════════════════════════
+    const PrimeraPlana = () => {
+      const grandes = [
+        { kind: 'people',   kicker: 'Crónica',     titulo: 'El agua que sostiene la vida', autor: 'Jorge E. Francesia', leer: '7 min' },
+        { kind: 'mountain', kicker: 'Análisis',    titulo: 'Acuerdos que transforman regiones', autor: 'Lucía Fernández',    leer: '5 min' },
+      ];
+      const cards = [
+        { kind: 'mineral', titulo: 'Litio en Olaroz: nueva línea de producción' },
+        { kind: 'data',    titulo: 'LTIFR provincial cae 31% interanual' },
+        { kind: 'salt',    titulo: 'El programa de evaporación cambia ritmos' },
+        { kind: 'book',    titulo: 'Manifiesto editorial: por qué un medio sectorial' },
+        { kind: 'mountain', titulo: 'MARA y la curva de inversión 2026-2030' },
+        { kind: 'people',  titulo: 'Operarios narran el primer turno del año' },
+      ];
+      return (
+        <section id="primera-plana" className="paper-texture border-b border-tinta/10">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10 py-16 md:py-24">
+            <Reveal>
+              <div className="flex items-center justify-between mb-10">
+                <SmallCaps className="text-cobre">Primera plana · Edición fundacional</SmallCaps>
+                <span className="font-mono text-[10px] uppercase tracking-institutional text-tinta/50">Pág. 03</span>
+              </div>
             </Reveal>
 
-            <Reveal delay={0.4}>
-              <div className="lg:col-span-5">
-                <SmallCaps className="text-azul-institucional">Crónica fundacional</SmallCaps>
-                <h2 className="mt-4 font-display italic font-light text-tinta leading-[1.05] text-4xl md:text-5xl tracking-tight">
-                  La minería argentina <br/>
-                  ya no operará a oscuras.
-                </h2>
-                <HorizontalRule className="max-w-[180px]" />
-                <p className="font-display italic text-tinta/80 text-lg leading-relaxed">
-                  Nativos Consultora Digital presenta una infraestructura editorial y operativa para una industria que produce el 60% del litio argentino y, hasta ahora, lo hacía con planillas dispersas y registros analógicos.
-                </p>
-                <p className="mt-6 font-body text-tinta/75 leading-relaxed">
-                  Tres productos —Minera360, Latitud y Contacto— se integran en una única plataforma con seguridad, ambiente, mantenimiento, capacitación, comunicación interna y un medio editorial propio. La promesa: trazabilidad continua, predicción real y memoria pública.
-                </p>
-                <p className="mt-6 font-body text-tinta/75 text-sm">
-                  Por <span className="italic">Jorge Eduardo Francesia</span> — Founder, Nativos
-                </p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+              {/* Nota gigante izquierda */}
+              <Reveal delay={0.1} className="lg:col-span-7">
+                <article>
+                  <div className="aspect-[16/10] bg-azul-profundo overflow-hidden mb-6 relative">
+                    <PaisajeCordillera className="w-full h-full" />
+                  </div>
+                  <SmallCaps className="text-cobre">Crónica fundacional</SmallCaps>
+                  <h2 className="mt-3 font-display italic font-light text-tinta leading-[1.02] text-4xl md:text-5xl lg:text-[56px] tracking-tight">
+                    La minería argentina<br/>ya no operará a oscuras.
+                  </h2>
+                  <div className="copper-rule my-5 max-w-[120px]"></div>
+                  <p className="font-display italic text-tinta/80 text-lg leading-relaxed max-w-2xl">
+                    Nativos Consultora Digital presenta una infraestructura editorial y operativa para una industria que produce el 60% del litio argentino y, hasta ahora, lo hacía con planillas dispersas y registros analógicos.
+                  </p>
+                  <p className="mt-4 font-body text-tinta/65 text-sm">
+                    Por <span className="italic">Jorge Eduardo Francesia</span> · Founder, Nativos · 12 min de lectura
+                  </p>
+                </article>
+              </Reveal>
+
+              {/* Dos notas medianas + bloque de 6 cards */}
+              <div className="lg:col-span-5 space-y-8">
+                {grandes.map((g, i) => (
+                  <Reveal key={g.titulo} delay={0.25 + i * 0.1}>
+                    <article className="grid grid-cols-12 gap-4">
+                      <div className="col-span-5">
+                        <div className="aspect-[4/3] overflow-hidden">
+                          <ThumbnailEditorial kind={g.kind} className="w-full h-full" />
+                        </div>
+                      </div>
+                      <div className="col-span-7">
+                        <SmallCaps className="text-cobre">{g.kicker}</SmallCaps>
+                        <h3 className="mt-2 font-display italic text-tinta text-xl md:text-2xl leading-[1.1]">
+                          {g.titulo}
+                        </h3>
+                        <p className="mt-3 font-mono text-[10px] uppercase tracking-institutional text-tinta/50">
+                          {g.autor} · {g.leer}
+                        </p>
+                      </div>
+                    </article>
+                  </Reveal>
+                ))}
+
+                <Reveal delay={0.5}>
+                  <div className="border-t border-tinta/15 pt-6">
+                    <SmallCaps className="text-cobre">También en esta edición</SmallCaps>
+                    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {cards.map((c, i) => (
+                        <div key={i} className="space-y-2">
+                          <div className="aspect-[4/3] overflow-hidden museum-block">
+                            <ThumbnailEditorial kind={c.kind} className="w-full h-full" />
+                          </div>
+                          <p className="font-display italic text-tinta text-sm leading-snug">
+                            {c.titulo}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Reveal>
               </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    //  5. SECCIÓN CINEMATOGRÁFICA — "La montaña que piensa en agua"
+    // ═══════════════════════════════════════════════════════════════
+    const SeccionCinematografica = () => (
+      <section className="relative">
+        <div className="relative h-[420px] md:h-[520px] overflow-hidden bg-azul-profundo">
+          <PaisajeSalar className="absolute inset-0 w-full h-full" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-azul-profundo/30 to-azul-profundo/70"></div>
+
+          <div className="relative z-10 max-w-[1320px] mx-auto px-6 md:px-10 h-full flex flex-col justify-end pb-14">
+            <Reveal>
+              <SmallCaps className="text-oro-viejo">Cobertura especial · Litio</SmallCaps>
+            </Reveal>
+            <Reveal delay={0.2}>
+              <h2 className="mt-4 font-display italic font-light text-papel leading-[0.95] text-5xl md:text-7xl tracking-tight max-w-3xl">
+                La montaña que piensa<br/>
+                <span className="text-oro-viejo">en agua.</span>
+              </h2>
+            </Reveal>
+            <Reveal delay={0.4}>
+              <p className="mt-5 font-display italic text-papel/85 text-lg md:text-xl leading-relaxed max-w-2xl">
+                El salar como reloj geológico. Una historia hídrica que el sector minero recién empieza a escribir con rigor.
+              </p>
             </Reveal>
           </div>
         </div>
       </section>
     );
 
-    // 6. GRAN CRÓNICA
+    // ═══════════════════════════════════════════════════════════════
+    //  6. GRAN CRÓNICA
+    // ═══════════════════════════════════════════════════════════════
     const GranCronica = () => (
-      <section id="cronica" className="bg-papel-sombra border-y border-tinta/10">
-        <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
+      <section id="cronica" className="bg-papel-sombra border-b border-tinta/10">
+        <div className="max-w-[1320px] mx-auto px-6 md:px-10 py-20 md:py-28">
           <div className="text-center mb-12">
             <Reveal>
               <SmallCaps className="text-cobre">Gran crónica · Reportaje</SmallCaps>
@@ -549,10 +799,13 @@
                 visto desde adentro.
               </h2>
             </Reveal>
+            <Reveal delay={0.4}>
+              <OrnamentalDivider />
+            </Reveal>
           </div>
 
-          <Reveal delay={0.4}>
-            <article className="font-body text-tinta/85 leading-relaxed text-base md:text-[17px] columns-1 md:columns-2 lg:columns-3 gap-10 max-w-[1100px] mx-auto">
+          <Reveal delay={0.5}>
+            <article className="font-body text-tinta/85 leading-relaxed text-base md:text-[17px] columns-1 md:columns-2 lg:columns-3 gap-10 max-w-[1140px] mx-auto">
               <p className="drop-cap mb-5">
                 A 4.000 metros de altura, sobre la línea fronteriza entre Catamarca, Salta y Jujuy, se extiende una geografía que el mundo recién empieza a entender. El Triángulo del Litio —una franja altiplánica compartida con Bolivia y Chile— concentra el 56% de las reservas globales de un mineral que electrificará la próxima década.
               </p>
@@ -566,18 +819,18 @@
                 La plataforma se construye desde Catamarca, en una alianza con mineras del NOA que ya están operando proyectos de litio, oro y cobre. Tres productos forman su columna: <span className="font-display italic">Minera360</span> ordena la operación, <span className="font-display italic">Contacto</span> articula la voz interna del minero, y <span className="font-display italic">Latitud</span> —el medio editorial que estás leyendo— vuelve público lo que merece serlo.
               </p>
               <p className="mb-5">
-                Sobre los tres productos descansa un sistema de inteligencia entrenado para el contexto andino. No es un asistente genérico: es un agente que cruza datos cruzados de seguridad, mantenimiento, ambiente y clima organizacional, y entrega lecturas que solo serían posibles si todo conviviera en el mismo lugar. Un freno que falla, un operario sin recertificar, una encuesta de pulso baja, un viento que sube. La conjunción produce una alerta. La alerta evita una tragedia.
+                Sobre los tres productos descansa un sistema de inteligencia entrenado para el contexto andino. No es un asistente genérico: es un agente que cruza datos cruzados de seguridad, mantenimiento, ambiente y clima organizacional, y entrega lecturas que solo serían posibles si todo conviviera en el mismo lugar.
               </p>
               <p>
-                Esta primera edición editorial coincide con el lanzamiento del producto. Es un acto deliberado: <span className="font-display italic">la marca se presenta hablando</span>, no vendiendo. El compromiso es sostenerlo. Cada semana, una crónica. Cada mes, un atlas. Cada trimestre, una entrevista en profundidad. La minería del NOA tendrá su archivo. Y el archivo, cuando se construye con rigor, se vuelve memoria viva.
+                Esta primera edición editorial coincide con el lanzamiento del producto. Es un acto deliberado: <span className="font-display italic">la marca se presenta hablando</span>, no vendiendo. El compromiso es sostenerlo. Cada semana, una crónica. Cada mes, un atlas. Cada trimestre, una entrevista en profundidad.
               </p>
             </article>
           </Reveal>
 
-          <Reveal delay={0.6}>
-            <div className="mt-12 text-center">
-              <div className="editorial-rule max-w-xs mx-auto"></div>
-              <p className="mt-6 font-display italic text-tinta/60">
+          <Reveal delay={0.7}>
+            <div className="mt-14 text-center">
+              <OrnamentalDivider />
+              <p className="mt-3 font-display italic text-tinta/60">
                 Continúa en página interior · 12 minutos de lectura
               </p>
             </div>
@@ -586,106 +839,120 @@
       </section>
     );
 
-    // 7. ATLAS / MAPA INTERACTIVO
+    // ═══════════════════════════════════════════════════════════════
+    //  7. ATLAS CON BRÚJULA COBRE
+    // ═══════════════════════════════════════════════════════════════
     const AtlasMapa = () => {
       const points = [
-        { id: 'cat', label: 'Catamarca · Salar Hombre Muerto',  cx: 200, cy: 280, mineral: 'Litio',  inversion: 'USD 1.200 M', estado: 'Operación activa' },
-        { id: 'juj', label: 'Jujuy · Olaroz Cauchari',           cx: 160, cy: 180, mineral: 'Litio',  inversion: 'USD 980 M',   estado: 'Expansión' },
-        { id: 'sal', label: 'Salta · Centenario Ratones',        cx: 195, cy: 220, mineral: 'Litio',  inversion: 'USD 700 M',   estado: 'Pre-producción' },
-        { id: 'cat2', label: 'Catamarca · Andalgalá MARA',       cx: 245, cy: 320, mineral: 'Cobre',  inversion: 'USD 4.500 M', estado: 'Construcción' },
-        { id: 'lar', label: 'La Rioja · Famatina',                cx: 290, cy: 380, mineral: 'Oro',    inversion: 'USD 220 M',   estado: 'Exploración' },
-        { id: 'sju', label: 'San Juan · Veladero',                cx: 320, cy: 460, mineral: 'Oro',    inversion: 'USD 1.800 M', estado: 'Operación activa' },
+        { id: 'cat',  label: 'Catamarca · Hombre Muerto',   cx: 240, cy: 290, mineral: 'Litio',  inversion: 'USD 1.200 M', estado: 'Operación activa' },
+        { id: 'juj',  label: 'Jujuy · Olaroz Cauchari',     cx: 195, cy: 175, mineral: 'Litio',  inversion: 'USD 980 M',   estado: 'Expansión' },
+        { id: 'sal',  label: 'Salta · Centenario',          cx: 230, cy: 220, mineral: 'Litio',  inversion: 'USD 700 M',   estado: 'Pre-producción' },
+        { id: 'cat2', label: 'Catamarca · Andalgalá MARA',  cx: 285, cy: 345, mineral: 'Cobre',  inversion: 'USD 4.500 M', estado: 'Construcción' },
+        { id: 'lar',  label: 'La Rioja · Famatina',          cx: 330, cy: 415, mineral: 'Oro',    inversion: 'USD 220 M',   estado: 'Exploración' },
+        { id: 'sju',  label: 'San Juan · Veladero',          cx: 365, cy: 490, mineral: 'Oro',    inversion: 'USD 1.800 M', estado: 'Operación activa' },
       ];
-      const [hover, setHover] = useState(null);
-      const detail = points.find(p => p.id === hover);
+      const [hover, setHover] = useState('cat');
+      const detail = points.find(p => p.id === hover) || points[0];
 
       return (
         <section id="atlas" className="paper-texture">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10 py-20 md:py-28">
             <Reveal>
               <div className="text-center mb-12">
-                <SmallCaps className="text-cobre">Atlas Latitud360</SmallCaps>
+                <SmallCaps className="text-cobre">Atlas Latitud360 · Cartografía editorial</SmallCaps>
                 <h2 className="mt-6 font-display italic font-light text-tinta leading-[0.95] text-4xl md:text-6xl tracking-tight">
-                  Un territorio,<br/>seis operaciones madre.
+                  Explora nuestro<br/>territorio.
                 </h2>
-                <p className="mt-6 font-body text-tinta/70 max-w-xl mx-auto">
-                  Cartografía editorial del NOA. Litio, oro y cobre. Posición real, ficha sintética.
+                <OrnamentalDivider />
+                <p className="mt-2 font-body text-tinta/65 max-w-xl mx-auto">
+                  Seis operaciones madre. Litio, oro y cobre. Posición real, ficha sintética, hover para descubrir.
                 </p>
               </div>
             </Reveal>
 
             <Reveal delay={0.3}>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-center">
-                <div className="lg:col-span-2 relative">
-                  <div className="aspect-[4/5] relative bg-papel-sombra museum-block overflow-hidden">
-                    <svg viewBox="0 0 500 600" className="w-full h-full">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                {/* Mapa con brújula superpuesta */}
+                <div className="lg:col-span-8 relative">
+                  <div className="aspect-[4/3] relative bg-papel-sombra museum-block overflow-hidden">
+                    <svg viewBox="0 0 600 600" className="w-full h-full">
                       <defs>
                         <pattern id="topo-fine" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
                           <circle cx="20" cy="20" r="6"  fill="none" stroke="#12385B" strokeOpacity="0.07" strokeWidth="0.5"/>
                           <circle cx="20" cy="20" r="14" fill="none" stroke="#12385B" strokeOpacity="0.05" strokeWidth="0.5"/>
                         </pattern>
                       </defs>
-                      <rect width="500" height="600" fill="url(#topo-fine)"/>
-                      <path d="M 120 80 L 200 90 L 240 130 L 280 110 L 330 150 L 360 200 L 380 280 L 360 360 L 380 440 L 360 520 L 290 540 L 220 510 L 170 480 L 130 420 L 100 340 L 90 240 L 100 160 Z"
+                      <rect width="600" height="600" fill="url(#topo-fine)"/>
+
+                      {/* Silueta NOA — ilustrativa */}
+                      <path d="M 160 80 L 250 90 L 290 130 L 330 110 L 380 150 L 410 200 L 430 280 L 410 360 L 430 440 L 410 540 L 340 560 L 270 530 L 220 500 L 180 440 L 150 360 L 140 240 L 150 160 Z"
                             fill="#F5F1EA" stroke="#161616" strokeWidth="1.2" strokeOpacity="0.4"/>
-                      <path d="M 100 160 L 90 240 L 100 340 L 130 420" stroke="#B8754A" strokeWidth="1.4" strokeDasharray="4 3" fill="none" opacity="0.6"/>
+
+                      {/* Línea internacional */}
+                      <path d="M 150 160 L 140 240 L 150 360 L 180 440" stroke="#B8754A" strokeWidth="1.4" strokeDasharray="4 3" fill="none" opacity="0.6"/>
+
+                      {/* Líneas topográficas decorativas */}
+                      {[0, 1, 2].map(i => (
+                        <circle key={i} cx="285" cy="320" r={120 + i * 50} fill="none" stroke="#B8754A" strokeWidth="0.4" strokeOpacity="0.15"/>
+                      ))}
+
+                      {/* Puntos minerales */}
                       {points.map(p => (
-                        <g key={p.id} onMouseEnter={() => setHover(p.id)} onMouseLeave={() => setHover(null)} style={{ cursor: 'pointer' }}>
-                          <circle cx={p.cx} cy={p.cy} r="22" fill="#B8754A" opacity={hover === p.id ? 0.20 : 0.10}/>
-                          <circle cx={p.cx} cy={p.cy} r="12" fill="#B8754A" opacity={hover === p.id ? 0.40 : 0.18}/>
-                          <circle cx={p.cx} cy={p.cy} r="5"  fill="#B8754A"/>
-                          <text x={p.cx + 14} y={p.cy + 4} fontSize="9" fontFamily="'JetBrains Mono', monospace" fill="#161616" opacity="0.7" letterSpacing="0.08em">
+                        <g key={p.id} onMouseEnter={() => setHover(p.id)} style={{ cursor: 'pointer' }}>
+                          <circle cx={p.cx} cy={p.cy} r="22" fill="#B8754A" opacity={hover === p.id ? 0.22 : 0.10}/>
+                          <circle cx={p.cx} cy={p.cy} r="13" fill="#B8754A" opacity={hover === p.id ? 0.50 : 0.25}/>
+                          <circle cx={p.cx} cy={p.cy} r="6"  fill={hover === p.id ? '#0B1B2C' : '#B8754A'}/>
+                          <text x={p.cx + 16} y={p.cy + 4} fontSize="10" fontFamily="'JetBrains Mono', monospace" fill="#161616" opacity={hover === p.id ? 1 : 0.6} fontWeight={hover === p.id ? 600 : 400} letterSpacing="0.08em">
                             {p.id.toUpperCase()}
                           </text>
                         </g>
                       ))}
-                      <g transform="translate(420, 80)">
-                        <circle cx="0" cy="0" r="22" fill="none" stroke="#161616" strokeWidth="0.7" opacity="0.5"/>
-                        <path d="M 0 -18 L 4 0 L 0 18 L -4 0 Z" fill="#B8754A"/>
-                        <text x="0" y="-26" textAnchor="middle" fontSize="8" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fill="#161616">N</text>
-                      </g>
-                      <g transform="translate(50, 560)">
+
+                      {/* Escala */}
+                      <g transform="translate(60, 555)">
                         <line x1="0" y1="0" x2="60" y2="0" stroke="#161616" strokeWidth="1"/>
                         <line x1="0" y1="-3" x2="0" y2="3" stroke="#161616" strokeWidth="1"/>
                         <line x1="60" y1="-3" x2="60" y2="3" stroke="#161616" strokeWidth="1"/>
                         <text x="30" y="-8" textAnchor="middle" fontSize="8" fontFamily="'JetBrains Mono', monospace" fill="#161616" opacity="0.6">100 km</text>
                       </g>
+
+                      {/* Caption */}
+                      <text x="60" y="40" fontSize="10" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fill="#161616" opacity="0.6">Lámina I · Atlas mineral del NOA</text>
                     </svg>
+
+                    {/* Brújula cobre superpuesta */}
+                    <div className="absolute top-6 right-6">
+                      <CompasRosa size={150} />
+                    </div>
                   </div>
-                  <p className="mt-3 museum-caption text-sm">
-                    Lámina I · Atlas mineral del NOA argentino, Latitud360 — abril 2026.
-                  </p>
                 </div>
 
-                <div className="space-y-6">
+                {/* Ficha lateral */}
+                <div className="lg:col-span-4 space-y-6">
                   <SmallCaps className="text-azul-institucional">Ficha sintética</SmallCaps>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={detail?.id || 'empty'}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      {detail ? (
-                        <div>
-                          <h3 className="font-display italic text-tinta text-3xl leading-tight">
-                            {detail.label}
-                          </h3>
-                          <HorizontalRule className="my-5" />
-                          <dl className="space-y-3 font-body text-sm">
-                            <div className="flex justify-between"><dt className="text-tinta/60">Mineral</dt><dd className="text-tinta font-medium">{detail.mineral}</dd></div>
-                            <div className="flex justify-between"><dt className="text-tinta/60">Inversión</dt><dd className="text-tinta font-medium">{detail.inversion}</dd></div>
-                            <div className="flex justify-between"><dt className="text-tinta/60">Estado</dt><dd className="text-cobre font-medium">{detail.estado}</dd></div>
-                          </dl>
-                        </div>
-                      ) : (
-                        <p className="font-display italic text-tinta/60 text-base md:text-lg leading-relaxed">
-                          Pasá el cursor sobre cualquiera de los seis puntos. Cada uno revela un fragmento de su ficha operativa.
-                        </p>
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
+                  <div className="copper-rule max-w-[80px]"></div>
+                  <h3 className="font-display italic text-tinta text-3xl md:text-4xl leading-[1.05]">
+                    {detail.label}
+                  </h3>
+
+                  <dl className="space-y-4 font-body text-sm pt-4 border-t border-tinta/15">
+                    <div className="flex justify-between items-baseline">
+                      <dt className="font-mono text-[10px] uppercase tracking-institutional text-tinta/55">Mineral</dt>
+                      <dd className="text-tinta font-medium text-base">{detail.mineral}</dd>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <dt className="font-mono text-[10px] uppercase tracking-institutional text-tinta/55">Inversión</dt>
+                      <dd className="text-tinta font-medium text-base">{detail.inversion}</dd>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <dt className="font-mono text-[10px] uppercase tracking-institutional text-tinta/55">Estado</dt>
+                      <dd className="text-cobre font-medium text-base">{detail.estado}</dd>
+                    </div>
+                  </dl>
+
+                  <p className="pt-5 border-t border-tinta/15 font-display italic text-tinta/60 text-sm">
+                    Pasá el cursor sobre cualquiera de los seis puntos del mapa.
+                  </p>
                 </div>
               </div>
             </Reveal>
@@ -694,43 +961,54 @@
       );
     };
 
-    // 8. VOCES HUMANAS
+    // ═══════════════════════════════════════════════════════════════
+    //  8. VOCES HUMANAS — TESTIMONIOS HORIZONTALES
+    // ═══════════════════════════════════════════════════════════════
     const VocesHumanas = () => {
       const voces = [
-        { name: "Carlos Aguirre",      role: "HSE Manager · 18 años en minería del NOA",       quote: "Antes pasaba la mitad del mes haciendo reportes a mano. Ahora puedo mirar a mis operarios a los ojos." },
-        { name: "Mariana Salas",       role: "Coordinadora HSE · Mina Hombre Muerto",          quote: "El reconocimiento entre compañeros dejó de ser una intención. Es una práctica diaria." },
-        { name: "Juan Carlos Quispe",  role: "Chofer camión CAT 793",                          quote: "Reporté un near-miss desde el celular en menos de un minuto. Sin internet. Lo recibieron al volver." },
-        { name: "Lic. Vázquez",        role: "Subsecretaría de Minería de Catamarca",          quote: "Por primera vez tenemos cómo verificar el cumplimiento de compra local sin papeleo." },
+        { name: "Carlos Aguirre",     initials: "CA", role: "HSE Manager · 18 años",        quote: "Antes pasaba la mitad del mes haciendo reportes a mano. Ahora puedo mirar a mis operarios a los ojos." },
+        { name: "Mariana Salas",      initials: "MS", role: "Coordinadora HSE",              quote: "El reconocimiento entre compañeros dejó de ser una intención. Es una práctica diaria." },
+        { name: "Juan Carlos Quispe", initials: "JC", role: "Chofer CAT 793",                quote: "Reporté un near-miss desde el celular en menos de un minuto. Sin internet. Lo recibieron al volver." },
+        { name: "Lic. Vázquez",       initials: "LV", role: "Subsecretaría de Minería",      quote: "Por primera vez tenemos cómo verificar el cumplimiento de compra local sin papeleo." },
       ];
       return (
-        <section id="voces" className="bg-papel-sombra border-y border-tinta/10">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
+        <section id="voces" className="bg-azul-profundo text-papel relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.04]">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <pattern id="topo-noche" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+                <circle cx="100" cy="100" r="40" fill="none" stroke="#F5F1EA" strokeWidth="0.5"/>
+                <circle cx="100" cy="100" r="60" fill="none" stroke="#F5F1EA" strokeWidth="0.4"/>
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#F5F1EA" strokeWidth="0.3"/>
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#topo-noche)"/>
+            </svg>
+          </div>
+          <div className="relative max-w-[1320px] mx-auto px-6 md:px-10 py-20 md:py-28">
             <Reveal>
               <div className="text-center mb-14">
-                <SmallCaps className="text-cobre">Voces · Testimonios documentales</SmallCaps>
-                <h2 className="mt-6 font-display italic font-light text-tinta leading-[0.95] text-4xl md:text-6xl tracking-tight">
-                  La operación, en primera persona.
+                <SmallCaps className="text-oro-viejo">Voces · Testimonios documentales</SmallCaps>
+                <h2 className="mt-6 font-display italic font-light leading-[0.95] text-4xl md:text-6xl tracking-tight">
+                  La operación,<br/>en primera persona.
                 </h2>
               </div>
             </Reveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {voces.map((v, i) => (
-                <Reveal key={v.name} delay={i * 0.15}>
-                  <figure className="museum-block p-8 md:p-10 h-full flex flex-col">
-                    <div className="flex items-center gap-5 mb-6">
-                      <div className="w-14 h-14 rounded-full bg-azul-institucional flex items-center justify-center text-papel font-display italic text-xl shrink-0">
-                        {v.name.split(' ').slice(0, 2).map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <div className="font-display text-lg text-tinta leading-tight">{v.name}</div>
-                        <div className="font-mono text-[10px] uppercase tracking-institutional text-tinta/55 mt-1">{v.role}</div>
-                      </div>
+                <Reveal key={v.name} delay={i * 0.1}>
+                  <figure className="bg-azul-noche/60 backdrop-blur border border-papel/10 h-full flex flex-col">
+                    <div className="aspect-[4/5] overflow-hidden">
+                      <RetratoSilueta initials={v.initials} className="w-full h-full" />
                     </div>
-                    <blockquote className="flex-1 font-display italic text-2xl md:text-[28px] leading-snug text-tinta/90 relative pl-5">
-                      <span className="absolute -left-1 top-0 text-cobre text-4xl font-display leading-none select-none">"</span>
-                      {v.quote}
-                    </blockquote>
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="font-display text-papel text-lg leading-tight">{v.name}</div>
+                      <div className="mt-1 font-mono text-[10px] uppercase tracking-institutional text-papel/55">{v.role}</div>
+                      <div className="copper-rule mt-4 mb-4 max-w-[40px]"></div>
+                      <blockquote className="font-display italic text-papel/90 text-lg leading-snug flex-1">
+                        <span className="text-cobre text-2xl leading-none mr-1">"</span>
+                        {v.quote}
+                      </blockquote>
+                    </div>
                   </figure>
                 </Reveal>
               ))}
@@ -740,211 +1018,227 @@
       );
     };
 
-    // 9. AUDIOVISUAL / LIVE
-    const AudiovisualLive = () => {
-      const programas = [
-        { titulo: "Cumbre del Litio Catamarca 2026", subtitulo: "Cobertura ceremonial",        duracion: "01:42:18", estado: "EN VIVO",     cta: "Mirar transmisión" },
-        { titulo: "Entrevista al Ministro de Minería", subtitulo: "30 minutos sin esquivar",   duracion: "00:30:04", estado: "DISPONIBLE",  cta: "Ver entrevista" },
-        { titulo: "Salar de día · documental",        subtitulo: "Cuatro estaciones, una mina", duracion: "00:24:11", estado: "ESTRENO",     cta: "Reproducir" },
-        { titulo: "Voces de campamento",              subtitulo: "Podcast semanal · Episodio 03", duracion: "00:48:32", estado: "NUEVO",       cta: "Escuchar" },
+    // ═══════════════════════════════════════════════════════════════
+    //  9. AUDIOVISUAL + OBSERVATORIO LADO A LADO
+    // ═══════════════════════════════════════════════════════════════
+    const AudiovisualObservatorio = () => {
+      const ltifrSeries = [0.61, 0.58, 0.49, 0.46, 0.52, 0.43, 0.38, 0.42, 0.39, 0.36, 0.34, 0.42];
+      const sponsorBars = [
+        { label: 'Mineras',      valor: 18, color: '#B8754A' },
+        { label: 'Estado',       valor: 6,  color: '#12385B' },
+        { label: 'Cámaras',      valor: 4,  color: '#5E86A8' },
+        { label: 'Aceleradoras', valor: 2,  color: '#C2A56D' },
       ];
+      const max = Math.max(...sponsorBars.map(b => b.valor));
+      const total = sponsorBars.reduce((s, b) => s + b.valor, 0);
+
+      // Donut: distribución de minerales
+      const mineralDist = [
+        { label: 'Litio',  pct: 56, color: '#5E86A8' },
+        { label: 'Cobre',  pct: 28, color: '#B8754A' },
+        { label: 'Oro',    pct: 12, color: '#C2A56D' },
+        { label: 'Otros',  pct: 4,  color: '#8C949C' },
+      ];
+      let cumPct = 0;
+      const donutSegs = mineralDist.map(d => {
+        const start = cumPct;
+        cumPct += d.pct;
+        return { ...d, start, end: cumPct };
+      });
+
       return (
-        <section className="bg-azul-profundo text-papel relative overflow-hidden">
-          <div className="absolute inset-0 topo-pattern opacity-15"></div>
-          <div className="relative max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
+        <section id="audiovisual" className="paper-texture">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10 py-20 md:py-28">
             <Reveal>
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
-                  <SmallCaps className="text-oro-viejo">Audiovisual · En vivo y en archivo</SmallCaps>
-                  <h2 className="mt-6 font-display italic font-light leading-[0.95] text-4xl md:text-6xl tracking-tight">
-                    Programación editorial<br/>
-                    <span className="text-oro-viejo">de la semana.</span>
+                  <SmallCaps className="text-cobre">Audiovisual + Observatorio</SmallCaps>
+                  <h2 className="mt-5 font-display italic font-light text-tinta leading-[0.95] text-4xl md:text-6xl tracking-tight">
+                    Lo que pasa hoy,<br/>medido y narrado.
                   </h2>
                 </div>
-                <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-institutional text-papel/70">
+                <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-institutional text-tinta/65">
                   <div className="w-2 h-2 rounded-full bg-cobre animate-pulse"></div>
-                  Estudio NOA · Catamarca
+                  Estudio NOA · En vivo
                 </div>
               </div>
             </Reveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {programas.map((p, i) => (
-                <Reveal key={i} delay={i * 0.12}>
-                  <article className="group cursor-pointer">
-                    <div className="aspect-video relative bg-azul-institucional border border-papel/10 overflow-hidden">
-                      <div className="absolute inset-0 topo-pattern opacity-20"></div>
-                      <div className="absolute top-3 left-3 px-2 py-1 bg-cobre text-papel font-mono text-[9px] tracking-institutional uppercase">
-                        {p.estado}
-                      </div>
-                      <div className="absolute bottom-3 right-3 font-mono text-[10px] text-papel/80">{p.duracion}</div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 rounded-full border border-papel/40 flex items-center justify-center group-hover:bg-papel/10 transition-colors duration-500">
-                          <div className="w-0 h-0 border-y-[10px] border-y-transparent border-l-[14px] border-l-papel ml-1.5"></div>
-                        </div>
-                      </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Video player principal */}
+              <Reveal delay={0.2} className="lg:col-span-7">
+                <div>
+                  <div className="aspect-video relative bg-azul-profundo overflow-hidden museum-block">
+                    <PaisajeCordillera className="w-full h-full opacity-80" />
+                    <div className="absolute inset-0 bg-azul-profundo/30"></div>
+                    <div className="absolute top-4 left-4 px-3 py-1.5 bg-cobre text-papel font-mono text-[10px] tracking-institutional uppercase">
+                      ⬩ En vivo
                     </div>
-                    <h3 className="mt-4 font-display italic text-xl leading-tight text-papel">
-                      {p.titulo}
-                    </h3>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-institutional text-papel/60">{p.subtitulo}</p>
-                    <p className="mt-3 editorial-link text-sm text-oro-viejo">{p.cta} →</p>
-                  </article>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // 10. OBSERVATORIO DE DATOS
-    const ObservatorioDatos = () => {
-      const ltifrSeries = [0.61, 0.58, 0.49, 0.46, 0.52, 0.43, 0.38, 0.42, 0.39, 0.36, 0.34, 0.42];
-      const sponsorBars = [
-        { label: 'Mineras', valor: 18, color: '#B8754A' },
-        { label: 'Estado', valor: 6, color: '#12385B' },
-        { label: 'Cámaras', valor: 4, color: '#5E86A8' },
-        { label: 'Aceleradoras', valor: 2, color: '#C2A56D' },
-      ];
-      const max = Math.max(...sponsorBars.map(b => b.valor));
-
-      return (
-        <section className="paper-texture">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
-            <Reveal>
-              <div className="text-center mb-14">
-                <SmallCaps className="text-cobre">Observatorio · Datos públicos del sector</SmallCaps>
-                <h2 className="mt-6 font-display italic font-light text-tinta leading-[0.95] text-4xl md:text-6xl tracking-tight max-w-3xl mx-auto">
-                  Lo que la industria registra,<br/>
-                  ahora puede leerse.
-                </h2>
-              </div>
-            </Reveal>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <Reveal delay={0.2}>
-                <div className="museum-block p-8 md:p-10 h-full flex flex-col justify-between">
-                  <SmallCaps className="text-cobre">Mina Hombre Muerto</SmallCaps>
-                  <div className="my-8">
-                    <div className="font-display italic text-tinta text-7xl md:text-[120px] leading-none">
-                      127
-                    </div>
-                    <div className="mt-2 font-display italic text-tinta/70 text-xl">
-                      días sin accidentes con tiempo perdido
+                    <div className="absolute bottom-4 right-4 font-mono text-[11px] text-papel/85">01:42:18</div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-full border-2 border-papel/60 flex items-center justify-center hover:bg-papel/10 transition-colors duration-500 cursor-pointer">
+                        <div className="w-0 h-0 border-y-[12px] border-y-transparent border-l-[18px] border-l-papel ml-2"></div>
+                      </div>
                     </div>
                   </div>
-                  <div className="font-mono text-[10px] uppercase tracking-institutional text-tinta/50">
-                    Récord histórico · Registro continuo desde 2019
+                  <div className="mt-4 px-1">
+                    <SmallCaps className="text-cobre">Cobertura especial</SmallCaps>
+                    <h3 className="mt-2 font-display italic text-tinta text-2xl md:text-3xl leading-tight">
+                      Cumbre del Litio Catamarca 2026
+                    </h3>
+                    <p className="mt-2 font-mono text-[11px] uppercase tracking-institutional text-tinta/55">
+                      Día 1 · Apertura institucional · 12 países convocados
+                    </p>
                   </div>
                 </div>
               </Reveal>
 
-              <Reveal delay={0.35}>
-                <div className="museum-block p-8 h-full">
-                  <SmallCaps className="text-azul-institucional">LTIFR · 12 meses</SmallCaps>
-                  <h3 className="mt-3 font-display italic text-tinta text-2xl leading-tight">
-                    Tasa de incidentes con tiempo perdido
-                  </h3>
-                  <div className="my-6">
-                    <svg viewBox="0 0 280 140" className="w-full h-auto">
-                      <line x1="0" y1="120" x2="280" y2="120" stroke="#161616" strokeOpacity="0.2" strokeWidth="0.5"/>
-                      <polyline
-                        fill="none"
-                        stroke="#B8754A"
-                        strokeWidth="1.5"
-                        points={ltifrSeries.map((v, i) => `${(i / (ltifrSeries.length - 1)) * 280},${120 - (v / 0.7) * 100}`).join(' ')}
-                      />
+              {/* Observatorio: 3 widgets */}
+              <div className="lg:col-span-5 space-y-4">
+                {/* KPI 127 */}
+                <Reveal delay={0.3}>
+                  <div className="museum-block p-6 flex items-center gap-5">
+                    <div>
+                      <SmallCaps className="text-cobre">Récord histórico</SmallCaps>
+                      <div className="font-display italic text-tinta text-6xl leading-none mt-2">127</div>
+                      <div className="mt-1 font-mono text-[10px] uppercase tracking-institutional text-tinta/55">
+                        Días sin acc. con tiempo perdido
+                      </div>
+                    </div>
+                    <div className="ml-auto">
+                      <svg width="80" height="80" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="#161616" strokeOpacity="0.1" strokeWidth="6"/>
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="#B8754A" strokeWidth="6"
+                                strokeDasharray={`${2 * Math.PI * 34 * 0.85} ${2 * Math.PI * 34}`}
+                                transform="rotate(-90 40 40)"
+                                strokeLinecap="round"/>
+                        <text x="40" y="46" textAnchor="middle" fontSize="14" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fill="#B8754A">85%</text>
+                      </svg>
+                    </div>
+                  </div>
+                </Reveal>
+
+                {/* Sparkline LTIFR */}
+                <Reveal delay={0.4}>
+                  <div className="museum-block p-6">
+                    <div className="flex items-baseline justify-between mb-3">
+                      <SmallCaps className="text-azul-institucional">LTIFR · 12 meses</SmallCaps>
+                      <span className="font-display italic text-tinta text-2xl">0.42</span>
+                    </div>
+                    <svg viewBox="0 0 280 80" className="w-full h-auto">
+                      <line x1="0" y1="65" x2="280" y2="65" stroke="#161616" strokeOpacity="0.15" strokeWidth="0.5"/>
+                      <polyline fill="none" stroke="#B8754A" strokeWidth="1.6"
+                                points={ltifrSeries.map((v, i) => `${(i / (ltifrSeries.length - 1)) * 280},${65 - (v / 0.7) * 55}`).join(' ')}/>
                       {ltifrSeries.map((v, i) => (
-                        <circle key={i} cx={(i / (ltifrSeries.length - 1)) * 280} cy={120 - (v / 0.7) * 100} r="2" fill="#B8754A"/>
+                        <circle key={i} cx={(i / (ltifrSeries.length - 1)) * 280} cy={65 - (v / 0.7) * 55} r="2.2" fill="#B8754A"/>
                       ))}
                     </svg>
+                    <p className="mt-2 font-mono text-[10px] uppercase tracking-institutional text-tinta/55">
+                      Caída -31% interanual
+                    </p>
                   </div>
-                  <div className="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-institutional text-tinta/50">
-                    <span>Abr '25</span>
-                    <span>Abr '26</span>
-                  </div>
-                  <p className="mt-4 font-body text-sm text-tinta/70 leading-relaxed">
-                    Caída sostenida del 31% interanual. Reflejo de la inversión en cultura HSE durante el ciclo 2025-2026.
-                  </p>
-                </div>
-              </Reveal>
+                </Reveal>
 
-              <Reveal delay={0.5}>
-                <div className="museum-block p-8 h-full">
-                  <SmallCaps className="text-azul-institucional">Aliados activos · 2026</SmallCaps>
-                  <h3 className="mt-3 font-display italic text-tinta text-2xl leading-tight">
-                    30 organizaciones del NOA en la red
-                  </h3>
-                  <div className="mt-7 space-y-4">
-                    {sponsorBars.map((b) => (
-                      <div key={b.label}>
-                        <div className="flex items-baseline justify-between font-mono text-[11px] tracking-institutional uppercase text-tinta/70 mb-1">
-                          <span>{b.label}</span>
-                          <span className="text-tinta">{b.valor}</span>
-                        </div>
-                        <div className="h-1.5 bg-tinta/8">
-                          <div className="h-full" style={{ width: `${(b.valor / max) * 100}%`, backgroundColor: b.color }} />
-                        </div>
+                {/* Donut + Bar combo */}
+                <Reveal delay={0.5}>
+                  <div className="museum-block p-6 grid grid-cols-2 gap-5">
+                    <div>
+                      <SmallCaps className="text-azul-institucional">Mineral · NOA 2026</SmallCaps>
+                      <div className="mt-3 flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" width="120" height="120">
+                          {donutSegs.map((d, i) => {
+                            const r = 38, c = 2 * Math.PI * r;
+                            const offset = (d.start / 100) * c;
+                            const dash = (d.pct / 100) * c;
+                            return (
+                              <circle key={i} cx="50" cy="50" r={r} fill="none"
+                                      stroke={d.color} strokeWidth="14"
+                                      strokeDasharray={`${dash} ${c}`}
+                                      strokeDashoffset={-offset}
+                                      transform="rotate(-90 50 50)"/>
+                            );
+                          })}
+                          <text x="50" y="48" textAnchor="middle" fontSize="9" fontFamily="'JetBrains Mono', monospace" fill="#161616" opacity="0.6">RESERVAS</text>
+                          <text x="50" y="60" textAnchor="middle" fontSize="14" fontFamily="'Cormorant Garamond', serif" fontStyle="italic" fill="#B8754A" fontWeight="600">56%</text>
+                        </svg>
                       </div>
-                    ))}
+                    </div>
+                    <div>
+                      <SmallCaps className="text-azul-institucional">Aliados activos</SmallCaps>
+                      <div className="mt-3 space-y-2">
+                        {sponsorBars.map((b) => (
+                          <div key={b.label}>
+                            <div className="flex items-baseline justify-between font-mono text-[9px] tracking-institutional uppercase text-tinta/65 mb-0.5">
+                              <span>{b.label}</span>
+                              <span className="text-tinta font-medium">{b.valor}</span>
+                            </div>
+                            <div className="h-1 bg-tinta/8">
+                              <div className="h-full" style={{ width: `${(b.valor / max) * 100}%`, backgroundColor: b.color }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-tinta/10 font-mono text-[10px] uppercase tracking-institutional text-tinta/55">
+                        Total {total} · 6× en 12m
+                      </div>
+                    </div>
                   </div>
-                  <p className="mt-7 font-body text-sm text-tinta/70 leading-relaxed">
-                    Crecimiento de 6× en doce meses. La red actúa como sistema de pares, no como cartera comercial.
-                  </p>
-                </div>
-              </Reveal>
+                </Reveal>
+              </div>
             </div>
           </div>
         </section>
       );
     };
 
-    // 11. ARCHIVO / MEMORIA
+    // ═══════════════════════════════════════════════════════════════
+    //  10. ARCHIVO / MEMORIA — 6 thumbnails ricas
+    // ═══════════════════════════════════════════════════════════════
     const ArchivoMemoria = () => {
       const archivo = [
-        { fecha: "27 abr 2026", seccion: "Crónica",     titular: "Una semana en la planta: el ritmo invisible de la operación",         autor: "Lucía Fernández" },
-        { fecha: "22 abr 2026", seccion: "Análisis",    titular: "El impacto del precio del litio en las regalías provinciales",      autor: "Jorge E. Francesia" },
-        { fecha: "15 abr 2026", seccion: "Entrevista",  titular: "Federico Martínez (CAEM): «Necesitamos institucionalidad técnica»", autor: "Redacción" },
-        { fecha: "08 abr 2026", seccion: "Reportaje",   titular: "MARA + Agua Rica: anatomía de una inversión de 27 años",            autor: "Jorge E. Francesia" },
-        { fecha: "01 abr 2026", seccion: "Editorial",   titular: "Para qué sirve un medio sectorial",                                  autor: "Comité editorial" },
-        { fecha: "25 mar 2026", seccion: "Crónica",     titular: "El día que el salar bajó la temperatura en cinco grados",            autor: "Lucía Fernández" },
+        { fecha: "27 abr 2026", seccion: "Crónica",     kind: "people",   titulo: "Una semana en la planta: el ritmo invisible de la operación",       autor: "Lucía Fernández" },
+        { fecha: "22 abr 2026", seccion: "Análisis",    kind: "data",     titulo: "El precio del litio en las regalías provinciales",                  autor: "Jorge E. Francesia" },
+        { fecha: "15 abr 2026", seccion: "Entrevista",  kind: "book",     titulo: "Federico Martínez (CAEM): «Necesitamos institucionalidad técnica»", autor: "Redacción" },
+        { fecha: "08 abr 2026", seccion: "Reportaje",   kind: "mineral",  titulo: "MARA + Agua Rica: anatomía de una inversión de 27 años",            autor: "Jorge E. Francesia" },
+        { fecha: "01 abr 2026", seccion: "Editorial",   kind: "mountain", titulo: "Para qué sirve un medio sectorial",                                  autor: "Comité editorial" },
+        { fecha: "25 mar 2026", seccion: "Crónica",     kind: "salt",     titulo: "El día que el salar bajó cinco grados",                              autor: "Lucía Fernández" },
       ];
       return (
         <section id="archivo" className="bg-papel-sombra border-y border-tinta/10">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10 py-20 md:py-28">
             <Reveal>
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
                   <SmallCaps className="text-cobre">Archivo · Memoria del NOA</SmallCaps>
-                  <h2 className="mt-6 font-display italic font-light text-tinta leading-[0.95] text-4xl md:text-6xl tracking-tight">
-                    Todo lo publicado<br/>
-                    queda registrado.
+                  <h2 className="mt-5 font-display italic font-light text-tinta leading-[0.95] text-4xl md:text-6xl tracking-tight">
+                    Todo lo publicado<br/>queda registrado.
                   </h2>
                 </div>
                 <a href="#" className="editorial-link font-display italic text-tinta text-lg">
-                  Explorar archivo completo
+                  Explorar archivo completo →
                 </a>
               </div>
             </Reveal>
 
             <Reveal delay={0.3}>
-              <div className="border-t border-tinta/15">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
                 {archivo.map((nota) => (
-                  <a key={nota.titular} href="#" className="group grid grid-cols-12 gap-4 py-6 md:py-8 px-2 border-b border-tinta/15 hover:bg-papel transition-colors duration-500">
-                    <div className="col-span-12 md:col-span-2 font-mono text-[10px] uppercase tracking-institutional text-tinta/50 self-center">
-                      {nota.fecha}
+                  <article key={nota.titulo} className="group cursor-pointer">
+                    <div className="aspect-[5/3] overflow-hidden museum-block mb-4">
+                      <ThumbnailEditorial kind={nota.kind} className="w-full h-full" />
                     </div>
-                    <div className="col-span-12 md:col-span-2 font-mono text-[10px] uppercase tracking-institutional text-cobre self-center">
-                      {nota.seccion}
+                    <div className="flex items-center gap-2 mb-2">
+                      <SmallCaps className="text-cobre">{nota.seccion}</SmallCaps>
+                      <span className="text-tinta/30">·</span>
+                      <span className="font-mono text-[10px] uppercase tracking-institutional text-tinta/50">{nota.fecha}</span>
                     </div>
-                    <h3 className="col-span-12 md:col-span-6 font-display italic text-tinta text-xl md:text-2xl leading-snug self-center group-hover:text-azul-institucional transition-colors duration-500">
-                      {nota.titular}
+                    <h3 className="font-display italic text-tinta text-xl md:text-2xl leading-snug group-hover:text-azul-institucional transition-colors duration-500">
+                      {nota.titulo}
                     </h3>
-                    <div className="col-span-12 md:col-span-2 font-mono text-[11px] text-tinta/60 self-center md:text-right">
-                      {nota.autor}
-                    </div>
-                  </a>
+                    <p className="mt-3 font-mono text-[11px] text-tinta/60">
+                      Por {nota.autor}
+                    </p>
+                  </article>
                 ))}
               </div>
             </Reveal>
@@ -953,7 +1247,9 @@
       );
     };
 
-    // 12. ACTORES / ALIADOS
+    // ═══════════════════════════════════════════════════════════════
+    //  11. ALIADOS
+    // ═══════════════════════════════════════════════════════════════
     const ActoresAliados = () => {
       const aliados = [
         "CAEM", "Ministerio de Minería de Catamarca", "CAMYEN", "YMAD",
@@ -962,45 +1258,51 @@
       ];
       return (
         <section className="paper-texture">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-20 md:py-28">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10 py-20 md:py-24">
             <Reveal>
-              <div className="text-center mb-14">
+              <div className="text-center mb-12">
                 <SmallCaps className="text-cobre">Actores · Red institucional</SmallCaps>
-                <h2 className="mt-6 font-display italic font-light text-tinta leading-[0.95] text-4xl md:text-5xl tracking-tight max-w-3xl mx-auto">
+                <h2 className="mt-5 font-display italic font-light text-tinta leading-[0.95] text-3xl md:text-5xl tracking-tight max-w-3xl mx-auto">
                   La red detrás de Latitud360.
                 </h2>
+                <OrnamentalDivider />
               </div>
             </Reveal>
 
             <Reveal delay={0.2}>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-tinta/12 border border-tinta/12">
                 {aliados.map((a) => (
-                  <div key={a} className="bg-papel aspect-[3/2] flex items-center justify-center px-5 text-center">
-                    <span className="font-display italic text-tinta/80 text-sm md:text-base leading-tight">
+                  <div key={a} className="bg-papel aspect-[3/2] flex items-center justify-center px-5 text-center hover:bg-papel-sombra transition-colors duration-500">
+                    <span className="font-display italic text-tinta/85 text-sm md:text-base leading-tight">
                       {a}
                     </span>
                   </div>
                 ))}
               </div>
             </Reveal>
-
-            <Reveal delay={0.4}>
-              <p className="mt-12 text-center font-display italic text-tinta/60 text-base md:text-lg max-w-2xl mx-auto">
-                Una marca que nace acompañada. Acuerdos institucionales firmados o en conversación avanzada al cierre de esta primera edición.
-              </p>
-            </Reveal>
           </div>
         </section>
       );
     };
 
-    // 13. NEWSLETTER
+    // ═══════════════════════════════════════════════════════════════
+    //  12. NEWSLETTER
+    // ═══════════════════════════════════════════════════════════════
     const Newsletter = () => {
       const [email, setEmail] = useState("");
       const [done, setDone] = useState(false);
       return (
         <section id="newsletter" className="bg-azul-profundo text-papel relative overflow-hidden">
-          <div className="absolute inset-0 topo-pattern opacity-10"></div>
+          <div className="absolute inset-0 opacity-[0.05]">
+            <svg width="100%" height="100%">
+              <pattern id="newsletter-topo" x="0" y="0" width="220" height="220" patternUnits="userSpaceOnUse">
+                <circle cx="110" cy="110" r="40" fill="none" stroke="#F5F1EA" strokeWidth="0.4"/>
+                <circle cx="110" cy="110" r="70" fill="none" stroke="#F5F1EA" strokeWidth="0.3"/>
+                <circle cx="110" cy="110" r="100" fill="none" stroke="#F5F1EA" strokeWidth="0.2"/>
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#newsletter-topo)"/>
+            </svg>
+          </div>
           <div className="relative max-w-3xl mx-auto px-6 md:px-10 py-24 md:py-32 text-center">
             <Reveal>
               <SmallCaps className="text-oro-viejo">Suscripción ceremonial · Sin costo</SmallCaps>
@@ -1024,14 +1326,9 @@
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-3 border-b border-papel/40 pb-3">
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tu@correo.la"
-                      className="flex-1 bg-transparent text-papel placeholder-papel/40 font-display italic text-xl py-3 outline-none"
-                    />
+                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                           placeholder="tu@correo.la"
+                           className="flex-1 bg-transparent text-papel placeholder-papel/40 font-display italic text-xl py-3 outline-none"/>
                     <button type="submit" className="px-7 py-3 bg-cobre text-papel font-medium hover:bg-oro-viejo transition-colors duration-500 tracking-wide">
                       Suscribirme
                     </button>
@@ -1049,7 +1346,9 @@
       );
     };
 
-    // 14. FOOTER INSTITUCIONAL
+    // ═══════════════════════════════════════════════════════════════
+    //  13. FOOTER INSTITUCIONAL
+    // ═══════════════════════════════════════════════════════════════
     const FooterInstitucional = () => {
       const cols = [
         { titulo: "Plataforma",  items: ["Minera360", "Latitud", "Contacto", "Toori", "Latitud Copilot"] },
@@ -1058,20 +1357,21 @@
         { titulo: "Legal",       items: ["Privacidad", "Términos", "Compliance", "Reportes públicos"] },
       ];
       return (
-        <footer className="bg-tinta text-papel border-t border-cobre/30">
-          <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-16 md:py-20">
+        <footer className="bg-tinta text-papel border-t-2 border-cobre">
+          <div className="max-w-[1320px] mx-auto px-6 md:px-10 py-16 md:py-20">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
               <div className="md:col-span-4">
-                <div className="font-display italic text-4xl leading-none">
+                <div className="font-display italic text-5xl leading-none">
                   Latitud<span className="text-cobre">360</span>
                 </div>
-                <p className="mt-5 font-display italic text-papel/70 text-lg leading-relaxed max-w-xs">
+                <p className="mt-5 font-display italic text-papel/75 text-lg leading-relaxed max-w-xs">
                   Memoria de la minería del Triángulo del Litio. Construida desde Catamarca, Argentina.
                 </p>
-                <div className="mt-8 font-mono text-[10px] uppercase tracking-institutional text-papel/50 space-y-1">
+                <div className="mt-8 font-mono text-[10px] uppercase tracking-institutional text-papel/55 space-y-1.5">
                   <div>Nativos Consultora Digital S.A.S.</div>
                   <div>San Fernando del Valle de Catamarca</div>
                   <div>Argentina · Año fundacional 2026</div>
+                  <div className="text-cobre">25°S 67°O · 4000 msnm</div>
                 </div>
               </div>
 
@@ -1095,34 +1395,33 @@
                 <a href="#" className="editorial-link">YouTube</a>
                 <a href="#" className="editorial-link">Spotify</a>
               </div>
-              <div>Catamarca · 25°S 67°O · 4000 m</div>
+              <div>Memoria · Operación · Territorio</div>
             </div>
           </div>
         </footer>
       );
     };
 
-    const App = () => {
-      const [introDone, setIntroDone] = useState(false);
-      return (
-        <>
-          {!introDone && <IntroCeremonial onDone={() => setIntroDone(true)} />}
-          <Masthead />
-          <HeroMonumental />
-          <TickerEditorial />
-          <PrimeraPlana />
-          <GranCronica />
-          <AtlasMapa />
-          <VocesHumanas />
-          <AudiovisualLive />
-          <ObservatorioDatos />
-          <ArchivoMemoria />
-          <ActoresAliados />
-          <Newsletter />
-          <FooterInstitucional />
-        </>
-      );
-    };
+    // ═══════════════════════════════════════════════════════════════
+    //  APP
+    // ═══════════════════════════════════════════════════════════════
+    const App = () => (
+      <>
+        <Masthead />
+        <HeroMonumental />
+        <TickerEditorial />
+        <PrimeraPlana />
+        <SeccionCinematografica />
+        <GranCronica />
+        <AtlasMapa />
+        <VocesHumanas />
+        <AudiovisualObservatorio />
+        <ArchivoMemoria />
+        <ActoresAliados />
+        <Newsletter />
+        <FooterInstitucional />
+      </>
+    );
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
