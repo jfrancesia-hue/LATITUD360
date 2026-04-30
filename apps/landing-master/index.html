@@ -39,11 +39,112 @@
     };
   </script>
 
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
-  <script src="https://unpkg.com/framer-motion@11.11.17/dist/framer-motion.js"></script>
-  <script>window.Motion = window.FramerMotion;</script>
+
+  <!-- Motion shim local — emula la API de framer-motion (motion.X, AnimatePresence)
+       sobre Web Animations API. Evita el CDN UMD roto de framer-motion 11+. -->
+  <script>
+  (() => {
+    const buildTransform = (obj) => {
+      const parts = [];
+      if ('x' in obj)      parts.push(`translateX(${typeof obj.x === 'number' ? obj.x + 'px' : obj.x})`);
+      if ('y' in obj)      parts.push(`translateY(${typeof obj.y === 'number' ? obj.y + 'px' : obj.y})`);
+      if ('scale' in obj)  parts.push(`scale(${obj.scale})`);
+      if ('scaleY' in obj) parts.push(`scaleY(${obj.scaleY})`);
+      if ('rotate' in obj) parts.push(`rotate(${obj.rotate}deg)`);
+      return parts.length ? parts.join(' ') : null;
+    };
+    const PROPS = ['opacity', 'filter', 'background', 'backgroundColor', 'color', 'borderRadius', 'letterSpacing'];
+    const buildFrame = (obj) => {
+      const f = {};
+      const t = buildTransform(obj);
+      if (t) f.transform = t;
+      for (const p of PROPS) if (p in obj) f[p] = obj[p];
+      return f;
+    };
+    const explode = (initial, target, times) => {
+      const keys = new Set([...Object.keys(initial || {}), ...Object.keys(target || {})]);
+      let length = 1;
+      for (const k of keys) if (Array.isArray(target?.[k])) length = Math.max(length, target[k].length);
+      const frames = [];
+      for (let i = 0; i < length; i++) {
+        const obj = {};
+        for (const k of keys) {
+          let v = target?.[k];
+          if (Array.isArray(v))     v = v[Math.min(i, v.length - 1)];
+          else if (v === undefined) v = initial?.[k];
+          if (v !== undefined) obj[k] = v;
+        }
+        frames.push(buildFrame(obj));
+      }
+      if (times && length === times.length) frames.forEach((f, i) => f.offset = times[i]);
+      return frames;
+    };
+    const styleFromObj = (obj) => buildFrame(obj || {});
+
+    const cache = {};
+    const create = (Tag) => {
+      if (cache[Tag]) return cache[Tag];
+      const Comp = React.forwardRef((props, refExt) => {
+        const { initial, animate, exit, transition = {}, whileHover, style: styleProp = {}, children, ...rest } = props;
+        const innerRef = React.useRef(null);
+        const setRef = (node) => {
+          innerRef.current = node;
+          if (typeof refExt === 'function') refExt(node);
+          else if (refExt) refExt.current = node;
+        };
+
+        React.useEffect(() => {
+          const el = innerRef.current;
+          if (!el || !animate) return;
+          const frames = explode(initial, animate, transition.times);
+          if (initial && frames.length === 1) {
+            const start = buildFrame(initial);
+            if (Object.keys(start).length) frames.unshift(start);
+          }
+          const easings = {
+            easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+            easeIn:  'cubic-bezier(0.4, 0, 1, 1)',
+            easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            linear: 'linear',
+          };
+          const easeRaw = transition.ease;
+          const easing = Array.isArray(easeRaw)
+            ? `cubic-bezier(${easeRaw.join(',')})`
+            : (easings[easeRaw] || easeRaw || easings.easeOut);
+          try {
+            el.animate(frames, {
+              duration: (transition.duration ?? 0.5) * 1000,
+              delay:    (transition.delay ?? 0) * 1000,
+              easing,
+              fill: 'forwards',
+            });
+          } catch (e) { /* noop */ }
+        }, [JSON.stringify(animate)]);
+
+        const initialStyle = initial ? styleFromObj(initial) : {};
+        return React.createElement(Tag, {
+          ref: setRef,
+          style: { ...initialStyle, ...styleProp },
+          ...rest,
+        }, children);
+      });
+      Comp.displayName = `motion.${Tag}`;
+      cache[Tag] = Comp;
+      return Comp;
+    };
+
+    const motion = new Proxy({}, { get: (_, tag) => create(typeof tag === 'string' ? tag : 'div') });
+
+    // AnimatePresence simplificado: passthrough. Sin exit animations
+    // (suficiente para el caso de la intro ceremonial y los swaps del atlas).
+    const AnimatePresence = ({ children }) => React.createElement(React.Fragment, null, children);
+
+    window.Motion = { motion, AnimatePresence };
+  })();
+  </script>
 
   <style>
     html { scroll-behavior: smooth; }
