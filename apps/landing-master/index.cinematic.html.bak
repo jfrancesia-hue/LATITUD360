@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0A0A0A" />
+<title>Latitud360 — Una latitud. Todas tus operaciones.</title>
+<meta name="description" content="El sistema operativo de la minería del NOA. Construido en Catamarca con IA predictiva entrenada para el Triángulo del Litio." />
+
+<meta property="og:title" content="Latitud360 — Una latitud. Todas tus operaciones." />
+<meta property="og:description" content="El sistema operativo de la minería del NOA. Construido en Catamarca con IA predictiva entrenada para el Triángulo del Litio." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://latitud360.com" />
+<meta property="og:locale" content="es_AR" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          heading: ["'Instrument Serif'", "serif"],
+          body: ["'Barlow'", "sans-serif"],
+          mono: ["'JetBrains Mono'", "monospace"],
+        },
+        colors: {
+          mina: "#0A0A0A",
+          acero: "#1F1F1F",
+          niebla: "#2A2A2A",
+          naranja: "#FF6B1A",
+          turquesa: "#00C2B8",
+          dorado: "#D4AF37",
+          artico: "#F5F5F5",
+          ok: "#00B86B",
+          alerta: "#E63946",
+        },
+        borderRadius: {
+          DEFAULT: "9999px",
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background: #000;
+    color: #F5F5F5;
+    font-family: 'Barlow', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  *::selection { background: #FF6B1A; color: #fff; }
+
+  /* ─── Liquid glass ─────────────────────────────── */
+  .liquid-glass {
+    background: rgba(255,255,255,0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.10);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass::before {
+    content: ""; position: absolute; inset: 0;
+    border-radius: inherit; padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .liquid-glass-strong {
+    background: rgba(255,255,255,0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: none;
+    box-shadow: 4px 4px 4px rgba(0,0,0,0.05), inset 0 1px 1px rgba(255,255,255,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  .liquid-glass-strong::before {
+    content: ""; position: absolute; inset: 0;
+    border-radius: inherit; padding: 1.4px;
+    background: linear-gradient(180deg,
+      rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 20%,
+      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+      rgba(255,255,255,0.2) 80%, rgba(255,255,255,0.5) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  .liquid-glass-orange::before {
+    background: linear-gradient(180deg,
+      rgba(255,107,26,0.45) 0%, rgba(255,107,26,0.15) 20%,
+      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+      rgba(255,107,26,0.15) 80%, rgba(255,107,26,0.45) 100%) !important;
+  }
+  .liquid-glass-turquoise::before {
+    background: linear-gradient(180deg,
+      rgba(0,194,184,0.45) 0%, rgba(0,194,184,0.15) 20%,
+      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+      rgba(0,194,184,0.15) 80%, rgba(0,194,184,0.45) 100%) !important;
+  }
+  .liquid-glass-gold::before {
+    background: linear-gradient(180deg,
+      rgba(212,175,55,0.45) 0%, rgba(212,175,55,0.15) 20%,
+      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+      rgba(212,175,55,0.15) 80%, rgba(212,175,55,0.45) 100%) !important;
+  }
+
+  /* ─── Cinematic mesh fallback (cuando no hay video) ─── */
+  .mesh-hero {
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(0,194,184,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(255,107,26,0.20) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 80% at 50% 100%, rgba(212,175,55,0.10) 0%, transparent 70%),
+      linear-gradient(180deg, #050608 0%, #0A0A0A 50%, #060707 100%);
+  }
+  .mesh-cordillera {
+    background:
+      radial-gradient(ellipse 100% 80% at 50% 0%, rgba(212,175,55,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 0% 100%, rgba(108,80,150,0.15) 0%, transparent 65%),
+      linear-gradient(180deg, #1a0f1f 0%, #0A0A0A 100%);
+  }
+  .mesh-control {
+    background:
+      radial-gradient(ellipse 70% 70% at 70% 30%, rgba(0,194,184,0.22) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 20% 80%, rgba(255,107,26,0.15) 0%, transparent 60%),
+      linear-gradient(180deg, #02080a 0%, #0A0A0A 100%);
+  }
+  .mesh-mosaico {
+    background:
+      radial-gradient(ellipse 50% 50% at 20% 30%, rgba(0,194,184,0.20) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 30%, rgba(212,175,55,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(255,107,26,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(108,80,150,0.12) 0%, transparent 60%),
+      #0A0A0A;
+  }
+  .mesh-atardecer {
+    background:
+      radial-gradient(ellipse 100% 70% at 50% 100%, rgba(255,107,26,0.30) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 30% 80%, rgba(212,175,55,0.20) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 70% 90%, rgba(108,40,90,0.20) 0%, transparent 60%),
+      linear-gradient(180deg, #0A0A0A 0%, #1a0a14 70%, #2a1208 100%);
+  }
+
+  /* Mesh sutil animado (parallax 60s) */
+  .mesh-anim::after {
+    content: "";
+    position: absolute; inset: -10%;
+    background: inherit;
+    filter: blur(60px);
+    opacity: 0.7;
+    animation: meshDrift 60s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes meshDrift {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-3%,2%) scale(1.05); }
+  }
+
+  /* Grain overlay sutil */
+  .grain::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' /><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0' /></filter><rect width='100%25' height='100%25' filter='url(%23n)' /></svg>");
+    pointer-events: none;
+    z-index: 5;
+    mix-blend-mode: overlay;
+    opacity: 0.5;
+  }
+
+  /* ─── Pulse en señal LIVE ─── */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .5; transform: scale(1.3); }
+  }
+  .pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #0A0A0A; }
+  ::-webkit-scrollbar-thumb { background: #1F1F1F; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2A2A2A; }
+
+  /* ─── Reduced motion ─── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ─── Focus rings ─── */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid #FF6B1A;
+    outline-offset: 3px;
+    border-radius: 9999px;
+  }
+
+  /* ─── Section base ─── */
+  section.cinema {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  section.cinema > .bg-layer {
+    position: absolute; inset: 0;
+    z-index: 0;
+  }
+  section.cinema > .content-layer {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Tracking ajustes para Instrument Serif */
+  .heading-xl { letter-spacing: -0.04em; line-height: 0.85; }
+  .heading-lg { letter-spacing: -0.03em; line-height: 0.9; }
+
+  /* Chat mockup */
+  .copilot-chat .row { display: flex; gap: 12px; margin-top: 14px; align-items: flex-start; }
+  .copilot-chat .avatar {
+    width: 28px; height: 28px; border-radius: 9999px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  Motion shim — implementa la API de framer-motion (motion.X con  -->
+<!--  initial / animate / whileInView / viewport / transition /        -->
+<!--  whileHover) usando Web Animations API. Evita el CDN roto.        -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script>
+(() => {
+  const buildTransform = (obj) => {
+    const parts = [];
+    if ('x' in obj)        parts.push(`translateX(${typeof obj.x === 'number' ? obj.x + 'px' : obj.x})`);
+    if ('y' in obj)        parts.push(`translateY(${typeof obj.y === 'number' ? obj.y + 'px' : obj.y})`);
+    if ('scale' in obj)    parts.push(`scale(${obj.scale})`);
+    if ('rotate' in obj)   parts.push(`rotate(${obj.rotate}deg)`);
+    return parts.length ? parts.join(' ') : null;
+  };
+  const PROPS = ['opacity', 'filter', 'background', 'backgroundColor', 'color', 'borderRadius'];
+  const buildFrame = (obj) => {
+    const f = {};
+    const t = buildTransform(obj);
+    if (t) f.transform = t;
+    for (const p of PROPS) if (p in obj) f[p] = obj[p];
+    return f;
+  };
+  // Convert {y:[50,-5,0], opacity:[0,0.5,1]} → array of frames
+  const explode = (initial, target, times) => {
+    const keys = new Set([...Object.keys(initial || {}), ...Object.keys(target || {})]);
+    let length = 1;
+    for (const k of keys) if (Array.isArray(target?.[k])) length = Math.max(length, target[k].length);
+
+    const frames = [];
+    for (let i = 0; i < length; i++) {
+      const obj = {};
+      for (const k of keys) {
+        let v = target?.[k];
+        if (Array.isArray(v))      v = v[Math.min(i, v.length - 1)];
+        else if (v === undefined)  v = initial?.[k];
+        if (v !== undefined) obj[k] = v;
+      }
+      frames.push(buildFrame(obj));
+    }
+    if (times && length === times.length) {
+      frames.forEach((f, i) => f.offset = times[i]);
+    }
+    return frames;
+  };
+  const styleFromObj = (obj) => {
+    const f = buildFrame(obj || {});
+    return f;
+  };
+
+  const cache = {};
+  const create = (Tag) => {
+    if (cache[Tag]) return cache[Tag];
+    const Comp = React.forwardRef((props, refExt) => {
+      const {
+        initial, animate, whileInView, viewport, transition = {}, whileHover,
+        style: styleProp = {}, children, ...rest
+      } = props;
+      const innerRef = React.useRef(null);
+      const setRef = (node) => {
+        innerRef.current = node;
+        if (typeof refExt === 'function') refExt(node);
+        else if (refExt) refExt.current = node;
+      };
+      const [inView, setInView] = React.useState(false);
+
+      // IntersectionObserver
+      React.useEffect(() => {
+        if (!whileInView) return;
+        const el = innerRef.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(([entry]) => {
+          if (entry.isIntersecting) {
+            setInView(true);
+            if (viewport?.once) obs.disconnect();
+          } else if (!viewport?.once) setInView(false);
+        }, { threshold: viewport?.amount ?? 0.1 });
+        obs.observe(el);
+        return () => obs.disconnect();
+      }, [whileInView]);
+
+      // Apply animation
+      React.useEffect(() => {
+        const el = innerRef.current;
+        if (!el) return;
+        const target = whileInView ? (inView ? whileInView : null) : animate;
+        if (!target) return;
+
+        const frames = explode(initial, target, transition.times);
+        // Inicial frame solo si tenemos initial Y target diferente
+        if (initial && frames.length === 1) {
+          const start = buildFrame(initial);
+          if (Object.keys(start).length) frames.unshift(start);
+        }
+
+        const easings = {
+          easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
+          easeIn:  'cubic-bezier(0.4, 0, 1, 1)',
+          easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          linear: 'linear',
+        };
+        const easing = easings[transition.ease] || transition.ease || easings.easeOut;
+
+        try {
+          el.animate(frames, {
+            duration: (transition.duration ?? 0.5) * 1000,
+            delay:    (transition.delay ?? 0)     * 1000,
+            easing,
+            fill: 'forwards',
+          });
+        } catch (e) { /* noop */ }
+      }, [inView, animate]);
+
+      // whileHover
+      const [hovering, setHovering] = React.useState(false);
+      React.useEffect(() => {
+        if (!whileHover) return;
+        const el = innerRef.current;
+        if (!el) return;
+        if (hovering) {
+          el.animate([buildFrame(whileHover)], {
+            duration: 200, easing: 'cubic-bezier(0,0,0.2,1)', fill: 'forwards',
+          });
+        } else if (animate || initial) {
+          const back = animate || initial;
+          if (back) el.animate([buildFrame(back)], {
+            duration: 200, easing: 'cubic-bezier(0,0,0.2,1)', fill: 'forwards',
+          });
+        }
+      }, [hovering, whileHover]);
+
+      const initialStyle = (initial && !animate && !whileInView) ? styleFromObj(initial)
+        : initial ? styleFromObj(initial) : {};
+
+      const handlers = whileHover ? {
+        onMouseEnter: () => setHovering(true),
+        onMouseLeave: () => setHovering(false),
+      } : {};
+
+      return React.createElement(Tag, {
+        ref: setRef,
+        style: { ...initialStyle, ...styleProp },
+        ...handlers,
+        ...rest,
+      }, children);
+    });
+    Comp.displayName = `motion.${Tag}`;
+    cache[Tag] = Comp;
+    return Comp;
+  };
+
+  const motion = new Proxy({}, { get: (_, tag) => create(typeof tag === 'string' ? tag : 'div') });
+  window.Motion = { motion };
+})();
+</script>
+
+</head>
+<body>
+
+<div id="root"></div>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  ICONOS (inline SVG, stroke 1.5)                                  -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Icon = ({ d, className = "h-5 w-5", filled = false, viewBox = "0 0 24 24", children }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox={viewBox}
+       fill={filled ? "currentColor" : "none"} stroke="currentColor"
+       strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+       className={className}>
+    {children || (d && <path d={d} />)}
+  </svg>
+);
+
+const I = {
+  ArrowUpRight: (p) => <Icon {...p}><path d="M7 17 17 7M7 7h10v10"/></Icon>,
+  Play:         (p) => <Icon {...p} filled><path d="M8 5v14l11-7z"/></Icon>,
+  Shield:       (p) => <Icon {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></Icon>,
+  Cog:          (p) => <Icon {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.04a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.04a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></Icon>,
+  Users:        (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></Icon>,
+  Mountain:     (p) => <Icon {...p}><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></Icon>,
+  Radio:        (p) => <Icon {...p}><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></Icon>,
+  Wrench:       (p) => <Icon {...p}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></Icon>,
+  Sparkles:     (p) => <Icon {...p}><path d="m12 3-1.9 5.8L4 10.7l5.8 1.9L12 18l1.9-5.8L19 10.7l-5.8-1.9z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></Icon>,
+  Check:        (p) => <Icon {...p}><path d="M20 6 9 17l-5-5"/></Icon>,
+  Mic:          (p) => <Icon {...p}><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></Icon>,
+  ChevronDown:  (p) => <Icon {...p}><path d="m6 9 6 6 6-6"/></Icon>,
+  LinkedIn:     (p) => <Icon {...p}><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M8 10v8M8 7v.01M12 18v-5a3 3 0 0 1 6 0v5"/></Icon>,
+  X:            (p) => <Icon {...p}><path d="M4 4l16 16M20 4 4 20"/></Icon>,
+  YouTube:      (p) => <Icon {...p}><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m10 9 5 3-5 3z" fill="currentColor"/></Icon>,
+  Instagram:    (p) => <Icon {...p}><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></Icon>,
+};
+window.I = I;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  FadingVideo — fade in/out con rAF (sin CSS transitions)          -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const FadingVideo = ({ src, className, style }) => {
+  const ref = React.useRef(null);
+  const rafRef = React.useRef(null);
+  const fadingOutRef = React.useRef(false);
+  const FADE_MS = 500;
+  const FADE_OUT_LEAD = 0.55;
+
+  const fadeTo = (target, duration = FADE_MS) => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    const v = ref.current;
+    if (!v) return;
+    const start = performance.now();
+    const from = parseFloat(v.style.opacity || 0);
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      v.style.opacity = from + (target - from) * t;
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  };
+
+  React.useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.style.opacity = 0;
+    const onLoaded = () => { v.play().catch(() => {}); fadeTo(1); };
+    const onTimeUpdate = () => {
+      if (!fadingOutRef.current && v.duration - v.currentTime <= FADE_OUT_LEAD && v.duration - v.currentTime > 0) {
+        fadingOutRef.current = true;
+        fadeTo(0);
+      }
+    };
+    const onEnded = () => {
+      v.style.opacity = 0;
+      setTimeout(() => {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+        fadingOutRef.current = false;
+        fadeTo(1);
+      }, 100);
+    };
+    v.addEventListener('loadeddata', onLoaded);
+    v.addEventListener('timeupdate', onTimeUpdate);
+    v.addEventListener('ended', onEnded);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      v.removeEventListener('loadeddata', onLoaded);
+      v.removeEventListener('timeupdate', onTimeUpdate);
+      v.removeEventListener('ended', onEnded);
+    };
+  }, [src]);
+
+  return <video ref={ref} src={src} autoPlay muted playsInline preload="auto"
+                className={className} style={style} />;
+};
+window.FadingVideo = FadingVideo;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  BlurText — word-by-word blur-in con IntersectionObserver         -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const BlurText = ({ text, className, delayBase = 0, as = "p", center = true }) => {
+  const ref = React.useRef(null);
+  const [visible, setVisible] = React.useState(false);
+  const { motion } = window.Motion;
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => entry.isIntersecting && setVisible(true),
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const words = text.split(' ');
+  const Tag = as;
+  return (
+    <Tag ref={ref} className={className}
+         style={{
+           display: 'flex', flexWrap: 'wrap',
+           justifyContent: center ? 'center' : 'flex-start',
+           rowGap: '0.1em',
+         }}>
+      {words.map((word, i) => (
+        <motion.span
+          key={i}
+          initial={{ filter: 'blur(10px)', opacity: 0, y: 50 }}
+          animate={visible ? {
+            filter: ['blur(10px)', 'blur(5px)', 'blur(0px)'],
+            opacity: [0, 0.5, 1],
+            y: [50, -5, 0],
+          } : {}}
+          transition={{
+            duration: 0.7, times: [0, 0.5, 1],
+            ease: 'easeOut',
+            delay: delayBase + (i * 100) / 1000,
+          }}
+          style={{ display: 'inline-block', marginRight: '0.28em' }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </Tag>
+  );
+};
+window.BlurText = BlurText;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  NAVBAR — fixed top con liquid-glass pill                         -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Navbar = () => {
+  const { motion } = window.Motion;
+  const I = window.I;
+  const [open, setOpen] = React.useState(false);
+
+  const links = [
+    ["Plataforma", "#productos"],
+    ["Productos", "#productos"],
+    ["Industrias", "#industrias"],
+    ["Casos", "#casos"],
+    ["Latitud", "#productos"],
+    ["Contacto", "#cta"],
+  ];
+
+  return (
+    <motion.header
+      initial={{ y: -32, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
+      className="fixed top-4 left-0 right-0 z-50 px-4 md:px-8 lg:px-16">
+      <div className="flex items-center justify-between">
+
+        {/* Logo */}
+        <a href="#hero" aria-label="Latitud360 — inicio"
+           className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-artico shrink-0">
+          <span className="font-heading italic text-2xl leading-none">L</span>
+        </a>
+
+        {/* Pill central (desktop) */}
+        <nav className="hidden lg:flex liquid-glass rounded-full px-1.5 py-1.5 items-center gap-1 font-body text-sm text-artico/90">
+          {links.map(([label, href]) => (
+            <a key={label} href={href}
+               className="px-4 py-2 rounded-full hover:text-white hover:bg-white/5 transition-colors">
+              {label}
+            </a>
+          ))}
+          <a href="#cta"
+             className="ml-1 inline-flex items-center gap-1.5 bg-white text-mina rounded-full px-4 py-2 font-medium hover:bg-artico transition-colors">
+            Solicitar Demo
+            <I.ArrowUpRight className="h-4 w-4" />
+          </a>
+        </nav>
+
+        {/* Mobile CTA + toggle */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <a href="#cta"
+             className="inline-flex items-center gap-1.5 bg-white text-mina rounded-full px-3.5 py-2 text-xs font-medium">
+            Demo <I.ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
+          <button
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={open}
+            onClick={() => setOpen(o => !o)}
+            className="liquid-glass w-12 h-12 rounded-full flex items-center justify-center text-white">
+            <span className={"transition-transform " + (open ? "rotate-180" : "")}>
+              <I.ChevronDown className="h-5 w-5" />
+            </span>
+          </button>
+        </div>
+
+        {/* Spacer derecha desktop */}
+        <div className="hidden lg:block w-12 h-12 shrink-0" />
+      </div>
+
+      {/* Mobile menu */}
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="lg:hidden mt-3 liquid-glass rounded-3xl p-3 flex flex-col gap-1">
+          {links.map(([label, href]) => (
+            <a key={label} href={href} onClick={() => setOpen(false)}
+               className="px-4 py-3 rounded-full hover:bg-white/5 text-artico/90 text-sm">
+              {label}
+            </a>
+          ))}
+        </motion.div>
+      )}
+    </motion.header>
+  );
+};
+window.Navbar = Navbar;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  SECCIÓN 1 — HERO                                                  -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Section1Hero = () => {
+  const { motion } = window.Motion;
+  const { FadingVideo, BlurText, I } = window;
+
+  const stats = [
+    { Icon: I.Shield, num: "−32%", label: "Reducción incidentes HSE" },
+    { Icon: I.Cog,    num: "−25%", label: "Downtime no planificado" },
+    { Icon: I.Users,  num: "+300%", label: "Engagement del trabajador" },
+  ];
+
+  const trust = ["Catamarca", "Salta", "Jujuy", "La Rioja", "Antofagasta"];
+
+  return (
+    <section id="hero" className="cinema mesh-hero mesh-anim grain">
+      {/* Video opcional (si /videos/01-hero.mp4 existe, fadea sobre el mesh) */}
+      <div className="bg-layer">
+        <FadingVideo
+          src="videos/01-hero.mp4"
+          className="absolute left-1/2 top-0 -translate-x-1/2 object-cover object-top"
+          style={{ width: "120%", height: "120%" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/50 pointer-events-none" />
+      </div>
+
+      <div className="content-layer min-h-screen flex flex-col">
+        {/* Contenido centrado */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-4 pt-32 md:pt-28">
+
+          {/* Badge */}
+          <motion.div
+            initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+            animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 }}
+            className="liquid-glass rounded-full inline-flex items-center gap-2 pl-1.5 pr-3 py-1.5">
+            <span className="bg-white text-mina px-3 py-1 text-xs font-semibold rounded-full font-body tracking-wider">
+              NUEVO
+            </span>
+            <span className="text-sm text-artico/90 font-body">
+              Lanzamiento 2026 en Catamarca, Salta y Jujuy
+            </span>
+          </motion.div>
+
+          {/* Headline */}
+          <BlurText
+            text="Una latitud. Todas tus operaciones."
+            delayBase={0.6}
+            className="mt-8 font-heading italic text-artico text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] heading-xl max-w-4xl"
+          />
+
+          {/* Subheading */}
+          <motion.p
+            initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+            animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.8 }}
+            className="mt-6 text-sm md:text-base text-artico max-w-2xl font-body font-light leading-relaxed">
+            El sistema operativo de la minería del NOA. Una sola plataforma que unifica operaciones, comunicación interna y medio sectorial. Construida en Catamarca con IA predictiva entrenada para el Triángulo del Litio.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+            animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: 1.1 }}
+            className="mt-8 flex items-center gap-6 flex-wrap justify-center">
+            <a href="#cta"
+               className="liquid-glass-strong rounded-full px-5 py-2.5 inline-flex items-center gap-2 text-sm font-medium text-white">
+              Solicitar Demo
+              <I.ArrowUpRight className="h-5 w-5" />
+            </a>
+            <a href="#productos"
+               className="inline-flex items-center gap-2 text-sm font-medium text-artico hover:text-white">
+              <I.Play className="h-4 w-4" />
+              Ver plataforma
+            </a>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
+            animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: 1.3 }}
+            className="mt-12 flex flex-col md:flex-row items-stretch gap-4 w-full max-w-[720px]">
+            {stats.map(({ Icon, num, label }, i) => (
+              <div key={i}
+                   className="liquid-glass rounded-[1.25rem] p-5 flex-1 flex flex-col items-start gap-3 text-left min-w-0">
+                <div className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center text-artico">
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="font-heading italic text-artico text-4xl leading-none tracking-tight">{num}</div>
+                <div className="text-xs text-artico/90 font-body font-light">{label}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Trust bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.4 }}
+          className="flex flex-col items-center gap-5 pb-10 px-4">
+          <div className="liquid-glass rounded-full px-3.5 py-1.5 text-xs font-medium text-artico">
+            Construido en Catamarca para la minería de Argentina, Bolivia y Chile
+          </div>
+          <div className="flex flex-wrap justify-center items-baseline gap-x-8 md:gap-x-14 gap-y-2 font-heading italic text-artico/95 text-xl md:text-3xl tracking-tight">
+            {trust.map((c, i) => (
+              <React.Fragment key={c}>
+                <span>{c}</span>
+                {i < trust.length - 1 && <span className="text-artico/30 hidden md:inline">·</span>}
+              </React.Fragment>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+window.Section1Hero = Section1Hero;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  SECCIÓN 2 — TRES PRODUCTOS UNIFICADOS                            -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Section2Products = () => {
+  const { FadingVideo, BlurText, I } = window;
+
+  const products = [
+    {
+      Icon: I.Mountain, glassClass: "liquid-glass-orange",
+      iconTint: "text-naranja", monoTint: "text-naranja",
+      title: "Minera360", mono: "MINING OPERATIONS",
+      tags: ["HSE", "Ambiente", "Mantenimiento", "Capacitación"],
+      body: "La plataforma operativa para mineras del NOA. Seguridad, ambiente, mantenimiento y capacitación en un solo sistema con IA predictiva. Reduce 30% los incidentes y 25% el downtime.",
+      cta: "Conocer Minera360",
+    },
+    {
+      Icon: I.Radio, glassClass: "liquid-glass-gold",
+      iconTint: "text-dorado", monoTint: "text-dorado",
+      title: "Latitud", mono: "MEDIO SECTORIAL",
+      tags: ["Portal", "Streaming", "Sponsors", "Newsletter"],
+      body: "El medio especializado del NOA minero. Estudio de streaming propio, cobertura editorial profesional y comunicación estratégica para empresas, Estado y comunidad.",
+      cta: "Conocer Latitud",
+    },
+    {
+      Icon: I.Users, glassClass: "liquid-glass-turquoise",
+      iconTint: "text-turquesa", monoTint: "text-turquesa",
+      title: "Contacto", mono: "RRHH MINERA",
+      tags: ["Muro social", "Onboarding", "Recibos", "Cultura"],
+      body: "La intranet móvil del minero. Comunicación interna, RRHH operativo y cultura para tu fuerza laboral en faena. Diseñado para turnos rotativos y campamentos sin señal.",
+      cta: "Conocer Contacto",
+    },
+  ];
+
+  return (
+    <section id="productos" className="cinema mesh-cordillera mesh-anim grain">
+      <div className="bg-layer">
+        <FadingVideo src="videos/02-cordillera.mp4"
+          className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/30" />
+      </div>
+
+      <div className="content-layer px-6 md:px-12 lg:px-20 pt-24 pb-16 flex flex-col min-h-screen">
+
+        {/* Header */}
+        <div className="text-center max-w-4xl mx-auto">
+          <p className="font-mono text-xs text-artico/70 tracking-[0.2em] uppercase mb-6">// La plataforma</p>
+          <BlurText
+            text="Tres productos. Una sola plataforma."
+            className="font-heading italic text-artico text-5xl md:text-6xl lg:text-[5.5rem] heading-lg"
+          />
+          <p className="mt-6 text-base text-artico/85 font-body font-light max-w-2xl mx-auto">
+            Latitud360 unifica operaciones mineras, comunicación interna y medio sectorial en un solo sistema con IA. Login único, datos cruzados, inteligencia compuesta.
+          </p>
+        </div>
+
+        {/* 3 cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+          {products.map(({ Icon, glassClass, iconTint, monoTint, title, mono, tags, body, cta }) => (
+            <div key={title}
+                 className={"liquid-glass " + glassClass + " rounded-[1.5rem] p-7 lg:p-8 min-h-[480px] flex flex-col"}>
+
+              <div className={"liquid-glass w-14 h-14 rounded-2xl flex items-center justify-center " + iconTint + " mb-6"}>
+                <Icon className="h-6 w-6" />
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 mb-6">
+                {tags.map(t => (
+                  <span key={t}
+                        className="liquid-glass rounded-full px-2.5 py-0.5 text-[11px] font-body text-artico/85">
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              <h3 className="font-heading italic text-artico text-5xl leading-none">{title}</h3>
+              <div className={"font-mono text-[10px] uppercase tracking-[0.18em] mt-2 " + monoTint}>
+                {mono}
+              </div>
+
+              <p className="mt-6 text-sm text-artico/85 font-body font-light leading-relaxed flex-1">
+                {body}
+              </p>
+
+              <a href="#cta"
+                 className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-artico hover:text-white">
+                {cta} <I.ArrowUpRight className="h-4 w-4" />
+              </a>
+            </div>
+          ))}
+        </div>
+
+        {/* Add-on Toori */}
+        <div className="mt-12 liquid-glass rounded-[1.25rem] p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-5">
+          <div className="liquid-glass w-12 h-12 rounded-2xl flex items-center justify-center text-artico shrink-0">
+            <I.Wrench className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h4 className="font-heading italic text-artico text-2xl leading-none">Toori ServiciosYa</h4>
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-artico/60">Add-on opcional</span>
+            </div>
+            <p className="mt-2 text-sm text-artico/80 font-body font-light max-w-2xl">
+              ¿Necesitás contratar prestadores externos? Activalo on-demand desde tu plataforma. Marketplace verificado de servicios para minería.
+            </p>
+          </div>
+          <a href="#cta"
+             className="liquid-glass-strong rounded-full px-4 py-2 text-sm font-medium text-white inline-flex items-center gap-1.5 shrink-0">
+            Saber más <I.ArrowUpRight className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+};
+window.Section2Products = Section2Products;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  SECCIÓN 3 — AI COPILOT                                           -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Section3Copilot = () => {
+  const { FadingVideo, BlurText, I } = window;
+  const { motion } = window.Motion;
+
+  const features = [
+    "Predice incidentes cruzando 5+ fuentes de datos",
+    "Genera reportes ejecutivos en 30 segundos",
+    "Responde en español argentino, no en gringlés corporativo",
+  ];
+
+  return (
+    <section id="copilot" className="cinema mesh-control mesh-anim grain">
+      <div className="bg-layer">
+        <FadingVideo src="videos/03-control-room.mp4"
+          className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
+      <div className="content-layer grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-screen px-6 md:px-12 lg:px-20 py-24">
+
+        {/* Columna izquierda */}
+        <div>
+          <p className="font-mono text-xs text-turquesa tracking-[0.2em] uppercase mb-6">// Latitud Copilot</p>
+          <BlurText
+            text="Tu cerebro operativo. Que nunca duerme."
+            center={false}
+            className="font-heading italic text-artico text-5xl md:text-6xl lg:text-[5rem] heading-lg max-w-xl"
+          />
+          <p className="mt-6 text-base text-artico/85 font-body font-light max-w-md">
+            El primer agente de IA entrenado en datos cruzados de los 3 productos. Predice incidentes combinando seguridad, ambiente, mantenimiento y comunicación interna. Te dice qué va a fallar antes de que falle.
+          </p>
+
+          <ul className="mt-8 space-y-3 max-w-md">
+            {features.map((f, i) => (
+              <motion.li key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: i * 0.12, duration: 0.5 }}
+                className="flex items-start gap-3 text-sm text-artico/90 font-body">
+                <span className="liquid-glass w-6 h-6 rounded-full flex items-center justify-center text-naranja shrink-0 mt-0.5">
+                  <I.Check className="h-3.5 w-3.5" />
+                </span>
+                <span>{f}</span>
+              </motion.li>
+            ))}
+          </ul>
+
+          <a href="#cta"
+             className="mt-10 liquid-glass-strong rounded-full px-5 py-2.5 inline-flex items-center gap-2 text-sm font-medium text-white">
+            Ver demo del Copilot
+            <I.ArrowUpRight className="h-5 w-5" />
+          </a>
+        </div>
+
+        {/* Columna derecha — chat mockup */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="liquid-glass-strong rounded-[1.5rem] p-6 md:p-7 max-w-md w-full mx-auto lg:ml-auto copilot-chat">
+
+          {/* Header */}
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-naranja to-turquesa flex items-center justify-center">
+                <I.Sparkles className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-artico">Latitud Copilot</div>
+                <div className="text-[10px] font-mono text-artico/50 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-ok pulse-dot" />
+                  En línea · Conectado a 3 productos
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mensajes */}
+          <div className="font-mono text-[13px] leading-relaxed">
+
+            <div className="row justify-end">
+              <div className="liquid-glass rounded-2xl px-3.5 py-2.5 text-artico/90 max-w-[80%]">
+                ¿Qué riesgos tengo mañana en faena?
+              </div>
+              <div className="avatar bg-niebla text-artico/70">Op</div>
+            </div>
+
+            <div className="row">
+              <div className="avatar bg-gradient-to-br from-naranja to-turquesa text-white">
+                <I.Sparkles className="h-3.5 w-3.5" />
+              </div>
+              <div className="liquid-glass rounded-2xl px-3.5 py-3 text-artico/90 max-w-[85%] space-y-3">
+                <div>Buenos días Jorge. Detecté 3 alertas para mañana:</div>
+
+                <div>
+                  <span className="text-alerta">🔴 CRÍTICO</span> — Camión 47 con vibración fuera de rango (<span className="text-naranja">+18%</span> últimos 7d). Probabilidad de falla: <span className="text-naranja">73%</span>.
+                </div>
+                <div>
+                  <span className="text-[#FFC93C]">🟡 MEDIO</span> — 4 operarios turno noche con recertificación de manejo defensivo vencida. Bloqueé sus accesos.
+                </div>
+                <div>
+                  <span className="text-ok">🟢 INFO</span> — Pronóstico viento &gt;40km/h a las 14hs. Suspender izaje en plataforma 3. Notifiqué a Méndez.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Input mockup */}
+          <div className="mt-5 liquid-glass rounded-full px-4 py-2.5 flex items-center gap-2 text-artico/40 text-sm font-body">
+            <I.Mic className="h-4 w-4" />
+            <span>Preguntale algo al Copilot…</span>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+window.Section3Copilot = Section3Copilot;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  SECCIÓN 4 — INDUSTRIAS DEL NOA                                   -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Section4Industries = () => {
+  const { FadingVideo, BlurText, I } = window;
+
+  const industries = [
+    { name: "Litio",    chipTint: "text-turquesa", stat: "60% del litio argentino se produce en NOA",  bg: "from-turquesa/30 via-mina to-mina" },
+    { name: "Oro",      chipTint: "text-dorado",   stat: "8 proyectos activos en Catamarca y Salta",   bg: "from-dorado/30 via-mina to-mina" },
+    { name: "Cobre",    chipTint: "text-naranja",  stat: "MARA + Agua Rica = USD 4.500M inversión",    bg: "from-naranja/30 via-mina to-mina" },
+    { name: "Salares",  chipTint: "text-turquesa", stat: "Triángulo del litio = 56% reservas mundo",   bg: "from-turquesa/20 via-mina to-mina" },
+  ];
+
+  return (
+    <section id="industrias" className="cinema mesh-mosaico mesh-anim grain">
+      <div className="bg-layer">
+        <FadingVideo src="videos/04-industrias.mp4"
+          className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/50" />
+      </div>
+
+      <div className="content-layer px-6 md:px-12 lg:px-20 pt-24 pb-24">
+
+        <div className="text-center max-w-3xl mx-auto">
+          <p className="font-mono text-xs text-artico/70 tracking-[0.2em] uppercase mb-6">// Industrias</p>
+          <BlurText
+            text="Construido para la realidad del NOA"
+            className="font-heading italic text-artico text-5xl md:text-6xl lg:text-[5.5rem] heading-lg"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-16">
+          {industries.map(({ name, chipTint, stat, bg }) => (
+            <div key={name}
+                 className="relative rounded-[1.25rem] overflow-hidden min-h-[400px] flex flex-col justify-end group">
+              {/* Background gradient (cuando no hay imagen) */}
+              <div className={"absolute inset-0 bg-gradient-to-br " + bg} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+
+              {/* Content */}
+              <div className="relative z-10 p-5 liquid-glass rounded-t-none">
+                <span className="liquid-glass rounded-full px-2.5 py-0.5 text-[11px] font-body text-artico inline-block mb-3">
+                  {name}
+                </span>
+                <h3 className="font-heading italic text-artico text-4xl leading-none">{name}</h3>
+                <p className={"mt-3 font-mono text-[11px] " + chipTint + "/90 leading-snug"}>
+                  {stat}
+                </p>
+                <a href="#cta"
+                   className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-artico hover:text-white">
+                  Casos de uso <I.ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+window.Section4Industries = Section4Industries;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  SECCIÓN 5 — CASOS Y CLIENTES                                     -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Section5Cases = () => {
+  const { BlurText, I } = window;
+  const { motion } = window.Motion;
+
+  const logos = [
+    "Livent", "Eramet", "Ganfeng", "Allkem",
+    "CAEM", "CAMYEN", "Min. Minería Catamarca", "Repsol Fondo",
+  ];
+
+  return (
+    <section id="casos" className="cinema bg-mina grain">
+      <div className="bg-layer">
+        <div className="absolute inset-0 bg-gradient-to-b from-mina via-[#080808] to-mina" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-naranja/[0.04] blur-3xl pointer-events-none" />
+      </div>
+
+      <div className="content-layer px-6 md:px-12 lg:px-20 py-24 lg:py-32 max-w-7xl mx-auto">
+
+        <div className="text-center max-w-3xl mx-auto">
+          <p className="font-mono text-xs text-artico/70 tracking-[0.2em] uppercase mb-6">// Confianza</p>
+          <BlurText
+            text="Trabajamos con quienes mueven el NOA"
+            className="font-heading italic text-artico text-4xl md:text-5xl lg:text-6xl heading-lg"
+          />
+          <p className="mt-4 text-xs font-mono text-artico/50 tracking-wider uppercase">
+            En conversaciones con
+          </p>
+        </div>
+
+        {/* Logos */}
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+          {logos.map((logo, i) => (
+            <motion.div key={logo}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ delay: i * 0.05, duration: 0.5 }}
+              className="liquid-glass rounded-2xl h-20 flex items-center justify-center text-artico/70 font-heading italic text-xl hover:text-white transition-colors">
+              {logo}
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Testimonial */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+          whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="mt-20 liquid-glass-strong rounded-[1.5rem] p-8 md:p-12 max-w-3xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start gap-6">
+            <div className="w-20 h-20 shrink-0 rounded-full bg-gradient-to-br from-naranja via-dorado to-turquesa p-[2px]">
+              <div className="w-full h-full rounded-full bg-mina flex items-center justify-center font-heading italic text-3xl text-artico">
+                JF
+              </div>
+            </div>
+            <div>
+              <p className="font-heading italic text-artico text-2xl md:text-3xl leading-snug">
+                "Estamos construyendo desde Catamarca la infraestructura digital que toda la minería del NOA necesita. Latitud360 no es un software más: es el operating system del sector."
+              </p>
+              <div className="mt-5 font-body text-sm">
+                <div className="text-artico font-medium">Jorge Eduardo Francesia</div>
+                <div className="text-artico/60">Founder &amp; CEO, Nativos Consultora Digital</div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+window.Section5Cases = Section5Cases;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  SECCIÓN 6 — CTA FINAL + FOOTER                                   -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const Section6CTAFooter = () => {
+  const { FadingVideo, BlurText, I } = window;
+  const { motion } = window.Motion;
+
+  const cols = [
+    { title: "PRODUCTOS",  links: ["Minera360", "Latitud", "Contacto", "Toori"] },
+    { title: "PLATAFORMA", links: ["Seguridad", "Compliance", "API", "Estado"] },
+    { title: "EMPRESA",    links: ["Nosotros", "Equipo", "Carreras", "Prensa"] },
+    { title: "LEGAL",      links: ["Privacidad", "Términos", "Cookies"] },
+  ];
+
+  return (
+    <section id="cta" className="cinema mesh-atardecer mesh-anim grain">
+      <div className="bg-layer">
+        <FadingVideo src="videos/05-atardecer.mp4"
+          className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/30" />
+      </div>
+
+      <div className="content-layer flex flex-col min-h-screen">
+
+        {/* CTA */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-6 pt-32 pb-16">
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7 }}
+            className="liquid-glass rounded-full px-3.5 py-1.5 text-[11px] font-mono uppercase tracking-[0.2em] text-artico/85">
+            Para mineras del Triángulo del Litio
+          </motion.div>
+
+          <BlurText
+            text="Tu próxima revolución operativa empieza acá."
+            className="mt-8 font-heading italic text-artico text-5xl md:text-6xl lg:text-[6.5rem] heading-xl max-w-5xl"
+          />
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.6 }}
+            className="mt-8 text-base md:text-lg text-artico/85 font-body font-light max-w-2xl">
+            Agendá una demo personalizada con nuestro equipo. 30 minutos. Sin compromiso. Te mostramos exactamente cómo Latitud360 se aplicaría a tu operación.
+          </motion.p>
+
+          <motion.a
+            href="mailto:demo@latitud360.com?subject=Demo%20Latitud360"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.8 }}
+            whileHover={{ scale: 1.03 }}
+            className="mt-12 liquid-glass-strong rounded-full px-8 py-4 inline-flex items-center gap-3 text-base md:text-lg font-medium text-white">
+            Solicitar demo
+            <I.ArrowUpRight className="h-5 w-5" />
+          </motion.a>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 1 }}
+            className="mt-12 font-heading italic text-artico/70 text-xl md:text-2xl tracking-tight">
+            Catamarca · Argentina · 2026
+          </motion.p>
+        </div>
+
+        {/* Footer */}
+        <footer className="liquid-glass border-t border-white/5 px-6 md:px-12 lg:px-20 py-12">
+          <div className="max-w-7xl mx-auto">
+
+            {/* Top */}
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8 border-b border-white/5">
+              <div>
+                <div className="font-heading italic text-artico text-4xl tracking-tight">Latitud360</div>
+                <div className="font-body text-sm text-artico/60 mt-1">Una latitud. Todas tus operaciones.</div>
+              </div>
+              <div className="flex items-center gap-3">
+                <a href="https://linkedin.com" aria-label="LinkedIn"
+                   className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center text-artico/70 hover:text-white">
+                  <I.LinkedIn className="h-4 w-4" />
+                </a>
+                <a href="https://x.com" aria-label="X"
+                   className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center text-artico/70 hover:text-white">
+                  <I.X className="h-4 w-4" />
+                </a>
+                <a href="https://youtube.com" aria-label="YouTube"
+                   className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center text-artico/70 hover:text-white">
+                  <I.YouTube className="h-4 w-4" />
+                </a>
+                <a href="https://instagram.com" aria-label="Instagram"
+                   className="liquid-glass w-10 h-10 rounded-full flex items-center justify-center text-artico/70 hover:text-white">
+                  <I.Instagram className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Cols */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-10">
+              {cols.map(({ title, links }) => (
+                <div key={title}>
+                  <div className="font-mono text-[10px] tracking-[0.2em] text-artico/50 uppercase mb-4">{title}</div>
+                  <ul className="space-y-2.5">
+                    {links.map(l => (
+                      <li key={l}>
+                        <a href="#" className="text-sm font-body text-artico/85 hover:text-white">{l}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pt-8 border-t border-white/5 text-xs font-mono text-artico/50">
+              <div>© 2026 Nativos Consultora Digital — Catamarca, Argentina</div>
+              <div className="tracking-wider uppercase">Built in Catamarca · Latitud −28.4696 · Longitud −65.7795</div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </section>
+  );
+};
+window.Section6CTAFooter = Section6CTAFooter;
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!--  APP root + render                                                -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script type="text/babel">
+const App = () => {
+  const { Navbar, Section1Hero, Section2Products, Section3Copilot,
+          Section4Industries, Section5Cases, Section6CTAFooter } = window;
+  return (
+    <main>
+      <Navbar />
+      <Section1Hero />
+      <Section2Products />
+      <Section3Copilot />
+      <Section4Industries />
+      <Section5Cases />
+      <Section6CTAFooter />
+    </main>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+
+</body>
+</html>
