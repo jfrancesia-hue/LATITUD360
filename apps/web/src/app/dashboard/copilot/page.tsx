@@ -1,6 +1,7 @@
 "use client";
+import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Mic } from "lucide-react";
+import { Send, Sparkles, Mic, ShieldAlert, ArrowRight } from "lucide-react";
 import { Button, Card, CardContent, Input, cn } from "@latitud360/ui";
 
 interface Message {
@@ -136,6 +137,23 @@ export default function CopilotPage() {
 
       {/* Panel contexto */}
       <aside className="space-y-4 hidden lg:block">
+        <Link href="/dashboard/copilot/daily-risk">
+          <Card className="hover:translate-y-[-1px] transition-transform cursor-pointer ring-1 ring-naranja/30">
+            <CardContent className="p-5 bg-gradient-to-br from-naranja/10 via-mina to-alerta/10">
+              <div className="flex items-center justify-between">
+                <ShieldAlert className="h-5 w-5 text-naranja" />
+                <ArrowRight className="h-4 w-4 text-artico/40" />
+              </div>
+              <h3 className="mt-3 font-heading italic text-2xl text-artico leading-tight">
+                Alertas del día
+              </h3>
+              <p className="mt-2 text-xs font-mono text-artico/50">
+                Daily Risk Agent · 3 alertas activas para próximas 24h
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
         <Card>
           <CardContent className="p-5">
             <h3 className="font-mono text-xs uppercase tracking-wider text-artico/60 mb-4">Datos consultados</h3>
