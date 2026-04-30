@@ -3,6 +3,7 @@ import { ScrollView, View, Text, TextInput, Pressable, Alert, ActivityIndicator 
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { INCIDENT_TYPE_LABELS, SEVERITY_META } from "@latitud360/shared";
+import { apiMutation } from "../../src/lib/api";
 
 const TYPES = Object.keys(INCIDENT_TYPE_LABELS) as (keyof typeof INCIDENT_TYPE_LABELS)[];
 const SEVS = ["low", "medium", "high", "critical"] as const;
@@ -13,6 +14,7 @@ export default function NewIncidentMobile() {
   const [severity, setSeverity] = useState<typeof SEVS[number]>("medium");
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+  const [siteId, setSiteId] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async () => {
@@ -22,11 +24,33 @@ export default function NewIncidentMobile() {
     }
     setSubmitting(true);
     try {
-      // TODO: POST a /v1/incidents (offline queue si no hay red)
-      await new Promise((r) => setTimeout(r, 800));
-      Alert.alert("Reportado ✓", "Tu supervisor lo recibió. Vamos a contactarte si necesitamos más info.", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      const result = await apiMutation("POST", "/api/incidents", {
+        siteId: siteId || "00000000-0000-0000-0000-000000000000",
+        type,
+        severity,
+        title: title.trim(),
+        description: desc.trim(),
+        occurredAt: new Date().toISOString(),
+        involvedUserIds: [],
+        photoUrls: [],
+        videoUrls: [],
+      });
+
+      if (result.ok && result.offline) {
+        Alert.alert(
+          "Sin señal — reporte encolado",
+          "Lo guardamos en tu teléfono. Se va a enviar al supervisor automáticamente cuando recuperes señal.",
+          [{ text: "OK", onPress: () => router.back() }],
+        );
+      } else if (result.ok) {
+        Alert.alert(
+          "Reportado ✓",
+          "Tu supervisor lo recibió. Vamos a contactarte si necesitamos más info.",
+          [{ text: "OK", onPress: () => router.back() }],
+        );
+      } else {
+        Alert.alert("Error", result.error);
+      }
     } finally {
       setSubmitting(false);
     }
