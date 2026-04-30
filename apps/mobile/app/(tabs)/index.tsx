@@ -33,6 +33,38 @@ export default function HomeTab() {
           </Text>
         </Pressable>
 
+        {/* Latitud Copilot */}
+        <Pressable
+          onPress={() => router.push("/copilot")}
+          style={{
+            marginTop: 16,
+            padding: 18,
+            borderRadius: 16,
+            backgroundColor: "#1F1F1F",
+            borderWidth: 1,
+            borderColor: "#FF6B1A40",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <View style={{
+            width: 40, height: 40, borderRadius: 20,
+            backgroundColor: "#FF6B1A22", alignItems: "center", justifyContent: "center",
+          }}>
+            <Text style={{ fontSize: 20 }}>✨</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: "#FF6B1A", fontSize: 11, fontWeight: "700", letterSpacing: 0.5 }}>
+              LATITUD COPILOT
+            </Text>
+            <Text style={{ color: "#F5F5F5", fontSize: 15, marginTop: 2 }}>
+              Preguntale algo sobre tu turno
+            </Text>
+          </View>
+          <Text style={{ color: "#F5F5F540", fontSize: 18 }}>→</Text>
+        </Pressable>
+
         {/* Secciones */}
         <View style={{ marginTop: 32, gap: 12 }}>
           <Pressable style={{ backgroundColor: "#1F1F1F", padding: 16, borderRadius: 14 }}>

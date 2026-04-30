@@ -32,6 +32,7 @@ export default function RootLayout() {
         <Stack.Screen name="permit/new" options={{ presentation: "modal", title: "Solicitar permiso" }} />
         <Stack.Screen name="recognize/new" options={{ presentation: "modal", title: "Reconocer a alguien" }} />
         <Stack.Screen name="daily-report/new" options={{ presentation: "modal", title: "Parte diario" }} />
+        <Stack.Screen name="copilot" options={{ presentation: "modal", headerShown: false }} />
       </Stack>
       <StatusBar style="light" />
     </GestureHandlerRootView>
